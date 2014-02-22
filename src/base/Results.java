@@ -1,7 +1,10 @@
 package base;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-public class Results {
+
+public class Results implements Serializable {
+	private static final long serialVersionUID = -7858027301096005662L;
 	private HashMap<MedalCategories, Team> winners;
 	
 	public Results(ArrayList<Team> winners){

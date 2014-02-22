@@ -1,10 +1,11 @@
 package base;
 import java.util.Random;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-public class Event {
-	private static int numberOfMedals = 3;
+public class Event implements Serializable{
+	private static final long serialVersionUID = -9092827493794079435L;
+	private static int numberOfMedals = MedalCategories.values().length;
 	
 	private EventCategories eventName;
 	private Results result;

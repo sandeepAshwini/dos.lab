@@ -1,5 +1,10 @@
 package base;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
+
+import server.Cacophonix;
+
 
 public class Games {
 	private static EventCategories eventCategories;
@@ -58,39 +63,30 @@ public class Games {
 	
 	public void printGameIntro()
 	{
-		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue);
+		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue + ".");
 	}
 	
 	public static void main(String[] args){
 		int timeDelay = 10;
-		//Integer.parseInt(args[1]);
 		Games game = new Games("Pompeii", "48 BC");
-
 		int numEvents = game.events.size();
+		String host = (args.length < 1) ? null : args[0];
+		String SERVER_NAME = "Cacophonix";
 		
 		game.printGameIntro();
 		
-		for(int i = 0; i < numEvents; i++)
-		{
-			Event simulatedEvent = game.simulateNextEvent();
-			
-			try{
-				Thread.currentThread().sleep(timeDelay*1000);
-				
-			}catch(Exception e){
-				System.out.println("Vesuvius is erupting. Games Abandoned.");
-				System.exit(0);
-			}
-			
-		}
-		System.out.println();
-		System.out.println("Final Medal Tallies");
-		for(Team team:game.getTeams())
-		{
-			team.printMedalTally();
-			System.out.println();
-			
-		}
-		
+        try {
+        	Registry registry = LocateRegistry.getRegistry(host);
+            Cacophonix stub = (Cacophonix) registry.lookup(SERVER_NAME);
+            for(int i = 0; i < numEvents; i++)
+    		{
+    			Event simulatedEvent = game.simulateNextEvent();
+    			stub.updateScoresAndTallies(simulatedEvent);
+    			Thread.currentThread().sleep(timeDelay*1000);
+    		}
+        } catch (Exception e) {
+            System.err.println("Client exception: " + e.toString());
+            e.printStackTrace();
+        }
 	}
 }
