@@ -18,12 +18,12 @@ public class Games {
 		this.venue = venue;
 		currentEvent = 0;
 
-		for(EventCategories eventName:eventCategories.values())
+		for(EventCategories eventName : EventCategories.values())
 		{
 			this.events.add(new Event(eventName));
 		}
 	
-		for(NationCategories teamName:nationCategories.values())
+		for(NationCategories teamName : NationCategories.values())
 		{
 			this.participants.add(new Team(teamName));
 		}
@@ -45,19 +45,10 @@ public class Games {
 		return this.participants;
 	}
 	
-	public Results simulateNextEvent(){
+	public Event simulateNextEvent(){
 			Event currentEvent = events.get(this.currentEvent++);
 			currentEvent.simulateEvent(participants);
-			currentEvent.printResults();
-			Results eventResult = currentEvent.getResult();
-			updateTeamTallies(eventResult);
-			return eventResult;
-	}
-	
-	private void updateTeamTallies(Results result){
-		for(Team team:participants){
-			team.incrementMedalTally(result.getPosition(team));
-		}
+			return currentEvent;
 	}
 	
 	public Event getNextEvent(){
@@ -81,7 +72,7 @@ public class Games {
 		
 		for(int i = 0; i < numEvents; i++)
 		{
-			Results result = game.simulateNextEvent();
+			Event simulatedEvent = game.simulateNextEvent();
 			
 			try{
 				Thread.currentThread().sleep(timeDelay*1000);

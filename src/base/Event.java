@@ -1,7 +1,6 @@
 package base;
-import java.util.Random;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Random;
 
 public class Event {
 	private static int numberOfMedals = 3;
@@ -20,8 +19,7 @@ public class Event {
 	}
 	
 	public void updateResults(Results result){
-		this.result = result;
-		
+		this.result = result;		
 	}
 	
 	public Results getResult(){
@@ -38,7 +36,6 @@ public class Event {
 	} 
 	
 	public void simulateEvent(ArrayList<Team> participants){
-		int numTeams = participants.size();
 		ArrayList<Team> winners = new ArrayList<Team>();
 		Random r = new Random();
 		
@@ -50,8 +47,6 @@ public class Event {
 		
 		System.out.println();
 		Results eventResults = new Results(winners);
-		this.updateResults(eventResults);
-		
-	}
-	
+		this.updateResults(eventResults);		
+	}	
 }

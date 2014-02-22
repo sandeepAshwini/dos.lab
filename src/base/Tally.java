@@ -3,13 +3,11 @@ package base;
 import java.util.HashMap;
 
 public class Tally {
-	private static MedalCategories medalTypes;
-	
 	private HashMap<MedalCategories, Integer> medalTally;
 	
 	public Tally(){
 		this.medalTally = new HashMap<MedalCategories, Integer>();
-		for (MedalCategories category : medalTypes.values())
+		for (MedalCategories category : MedalCategories.values())
 		{
 			medalTally.put(category, 0);
 		}
