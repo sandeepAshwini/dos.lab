@@ -10,7 +10,6 @@ public class Games {
 	private String venue;
 	private String year;
 	private int currentEvent;
-	private Tally medalTally;
 	
 	public Games(String venue, String year){
 		this.events = new ArrayList<Event>();
@@ -48,8 +47,9 @@ public class Games {
 	
 	public Results simulateNextEvent(){
 			Event currentEvent = events.get(this.currentEvent++);
-			Results eventResult = currentEvent.simulateEvent(participants);
+			currentEvent.simulateEvent(participants);
 			currentEvent.printResults();
+			Results eventResult = currentEvent.getResult();
 			updateTeamTallies(eventResult);
 			return eventResult;
 	}
@@ -67,8 +67,9 @@ public class Games {
 	
 	public void printGameIntro()
 	{
-		System.out.println("Welcome to the Games of " + this.year + " at " + this.venue);
+		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue);
 	}
+	
 	public static void main(String[] args){
 		int timeDelay = 10;
 		//Integer.parseInt(args[1]);
@@ -86,7 +87,7 @@ public class Games {
 				Thread.currentThread().sleep(timeDelay*1000);
 				
 			}catch(Exception e){
-				System.out.println("Earthquake. Games Abandoned.");
+				System.out.println("Vesuvius is erupting. Games Abandoned.");
 				System.exit(0);
 			}
 			

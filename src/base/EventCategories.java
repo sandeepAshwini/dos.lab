@@ -1,9 +1,9 @@
 package base;
 
 public enum EventCategories {
-	STONE_LUGING("Gold Leaf"),
-	STONE_SLEDDING("Silver Leaf"),
-	STONE_SKATING("Bronze Leaf");
+	STONE_LUGING("Stone Luging"),
+	STONE_SLEDDING("Stone Sledding"),
+	STONE_SKATING("Stone Skating");
 	
 	private String value;
 	EventCategories(String category){

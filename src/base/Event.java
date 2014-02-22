@@ -37,7 +37,7 @@ public class Event {
 		this.result.printResults();
 	} 
 	
-	public Results simulateEvent(ArrayList<Team> participants){
+	public void simulateEvent(ArrayList<Team> participants){
 		int numTeams = participants.size();
 		ArrayList<Team> winners = new ArrayList<Team>();
 		Random r = new Random();
@@ -51,7 +51,6 @@ public class Event {
 		System.out.println();
 		Results eventResults = new Results(winners);
 		this.updateResults(eventResults);
-		return eventResults;
 		
 	}
 	
