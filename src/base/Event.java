@@ -11,7 +11,7 @@ public class Event implements Serializable{
 	private EventCategories eventName;
 	private Results result;
 	private int numberOfParticipants;
-	private ArrayList<Athlete> scores;
+	private ArrayList<Athlete> athletes;
 	
 	public Event(EventCategories eventName){
 		this.eventName = eventName;
@@ -21,10 +21,10 @@ public class Event implements Serializable{
 	private void setScores(){
 		Random rand = new Random();
 		this.numberOfParticipants = rand.nextInt(10);
-		this.scores = new ArrayList<Athlete>();
+		this.athletes = new ArrayList<Athlete>();
 		for(int i = 0; i < numberOfParticipants; i++)
 		{
-			this.scores.add(new Athlete(this.eventName));
+			this.athletes.add(new Athlete(this.eventName));
 		}
 		
 	}
@@ -48,13 +48,11 @@ public class Event implements Serializable{
 	} 
 	
 	public void simulateEvent(){
-		Collections.sort(this.scores);
+		Collections.sort(this.athletes);
 		ArrayList<NationCategories> winners = new ArrayList<NationCategories>();
 		for(int i = 0; i < numberOfMedals; i++){
-			winners.add(this.scores.get(i).getNationality());
+			winners.add(this.athletes.get(i).getNationality());
 		}
-		this.result.updateWinners(winners);
-	
-	}
-	
+		this.result.updateWinners(winners);	
+	}	
 }

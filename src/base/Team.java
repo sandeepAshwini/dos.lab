@@ -1,5 +1,4 @@
 package base;
-import java.util.ArrayList;
 
 public class Team {
 	private Tally medalTally;
@@ -18,10 +17,8 @@ public class Team {
 		this.teamName = name;
 	}
 	
-	public void incrementMedalTally(ArrayList<MedalCategories> categories){
-		for(MedalCategories medal : categories){
-			this.medalTally.incrementTally(medal);
-		}
+	public void incrementMedalTally(MedalCategories medalType){
+		this.medalTally.incrementTally(medalType);
 	}
 	
 	public NationCategories getTeamName(){

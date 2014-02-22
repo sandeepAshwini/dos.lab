@@ -13,5 +13,4 @@ public enum NationCategories {
 	public String getCategory(){
 		return this.value;
 	}
-
 }

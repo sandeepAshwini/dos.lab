@@ -1,24 +1,22 @@
 package base;
+import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import server.Cacophonix;
+import server.CacophonixInterface;
 
 
 public class Games {
-	private static EventCategories eventCategories;
-	private static NationCategories nationCategories;
 	
 	private ArrayList<Event> events;
-	private ArrayList<Team> participants;
 	private String venue;
 	private String year;
 	private int currentEvent;
 	
 	public Games(String venue, String year){
 		this.events = new ArrayList<Event>();
-		this.participants = new ArrayList<Team>();
 		this.year = year;
 		this.venue = venue;
 		currentEvent = 0;
@@ -27,12 +25,6 @@ public class Games {
 		{
 			this.events.add(new Event(eventName));
 		}
-	
-		for(NationCategories teamName : NationCategories.values())
-		{
-			this.participants.add(new Team(teamName));
-		}
-
 	}
 	
 	public String getGameVenue(){
@@ -44,10 +36,6 @@ public class Games {
 	
 	public ArrayList<Event> getEvents(){
 		return this.events;
-	}
-	
-	public ArrayList<Team> getTeams(){
-		return this.participants;
 	}
 	
 	public Event simulateNextEvent(){
@@ -77,7 +65,7 @@ public class Games {
 		
         try {
         	Registry registry = LocateRegistry.getRegistry(host);
-            Cacophonix stub = (Cacophonix) registry.lookup(SERVER_NAME);
+            CacophonixInterface stub = (CacophonixInterface) registry.lookup(SERVER_NAME);
             for(int i = 0; i < numEvents; i++)
     		{
     			Event simulatedEvent = game.simulateNextEvent();

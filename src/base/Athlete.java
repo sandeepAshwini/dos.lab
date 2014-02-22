@@ -1,8 +1,11 @@
 package base;
+import java.io.Serializable;
 import java.util.Random;
 import java.util.UUID;
 
-public class Athlete implements Comparable<Athlete>{
+public class Athlete implements Comparable<Athlete>, Serializable{
+	private static final long serialVersionUID = 6637345322731549058L;
+
 	private static int scoreRange = 10;
 	
 	private NationCategories nationality;
