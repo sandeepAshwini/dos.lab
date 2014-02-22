@@ -3,11 +3,13 @@ package base;
 import java.util.HashMap;
 
 public class Tally {
+	private static MedalCategories medalTypes;
+	
 	private HashMap<MedalCategories, Integer> medalTally;
 	
 	public Tally(){
 		this.medalTally = new HashMap<MedalCategories, Integer>();
-		for (MedalCategories category : MedalCategories.values())
+		for (MedalCategories category : medalTypes.values())
 		{
 			medalTally.put(category, 0);
 		}
@@ -20,7 +22,7 @@ public class Tally {
 	
 	public void printMedalTally(){
 		for(MedalCategories medal:medalTally.keySet()){
-			System.out.print(medal.getCategory() + " : " + medalTally.get(medal));
+			System.out.print(medal.getCategory() + " : " + medalTally.get(medal) + " ");
 		}
 	}
 	
