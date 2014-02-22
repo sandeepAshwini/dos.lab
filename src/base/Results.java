@@ -5,22 +5,22 @@ import java.util.HashMap;
 
 public class Results implements Serializable {
 	private static final long serialVersionUID = -7858027301096005662L;
-	private HashMap<MedalCategories, Team> winners;
+	private HashMap<MedalCategories, NationCategories> winners;
 	
-	public Results(ArrayList<Team> winners){
-		this.winners = new HashMap<MedalCategories, Team>();
+	public Results(ArrayList<NationCategories> winners){
+		this.winners = new HashMap<MedalCategories, NationCategories>();
 		updateWinners(winners);
 	}
 
 	public Results(){
-		this.winners = new HashMap<MedalCategories, Team>();
+		this.winners = new HashMap<MedalCategories, NationCategories>();
 	}
 	
-	public Team getTeam(MedalCategories medalType) {
+	public NationCategories getTeam(MedalCategories medalType) {
 		return winners.get(medalType);
 	}
 	
-	public void updateWinners(ArrayList<Team> winners)
+	public void updateWinners(ArrayList<NationCategories> winners)
 	{
 		int i = 0;
 		for(MedalCategories medalType : MedalCategories.values())
@@ -33,7 +33,7 @@ public class Results implements Serializable {
 	
 	public void printResults(){
 		for(MedalCategories medal : winners.keySet()){
-			System.out.println(medal.getCategory() + " : " + winners.get(medal).getTeamName().getCategory());
+			System.out.println(medal.getCategory() + " : " + winners.get(medal).getCategory());
 		}
 	}
 	

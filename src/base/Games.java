@@ -52,7 +52,7 @@ public class Games {
 	
 	public Event simulateNextEvent(){
 			Event currentEvent = events.get(this.currentEvent++);
-			currentEvent.simulateEvent(participants);
+			currentEvent.simulateEvent();
 			return currentEvent;
 	}
 	

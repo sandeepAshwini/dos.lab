@@ -1,4 +1,5 @@
 package base;
+import java.util.Collections;
 import java.util.Random;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,15 +10,23 @@ public class Event implements Serializable{
 	
 	private EventCategories eventName;
 	private Results result;
-	
-	public Event(EventCategories eventName, Results result){
-		this.eventName = eventName;
-		this.result = result;
-	}
+	private int numberOfParticipants;
+	private ArrayList<Athlete> scores;
 	
 	public Event(EventCategories eventName){
 		this.eventName = eventName;
 		this.result = new Results();
+	}
+
+	private void setScores(){
+		Random rand = new Random();
+		this.numberOfParticipants = rand.nextInt(10);
+		this.scores = new ArrayList<Athlete>();
+		for(int i = 0; i < numberOfParticipants; i++)
+		{
+			this.scores.add(new Athlete(this.eventName));
+		}
+		
 	}
 	
 	public void updateResults(Results result){
@@ -38,21 +47,14 @@ public class Event implements Serializable{
 		this.result.printResults();
 	} 
 	
-	public void simulateEvent(ArrayList<Team> participants){
-		int numTeams = participants.size();
-		ArrayList<Team> winners = new ArrayList<Team>();
-		Random r = new Random();
-		
-		for(int i = 0; i < numberOfMedals; i++)
-		{
-			int key = r.nextInt(numberOfMedals);
-			winners.add(participants.get(key));
+	public void simulateEvent(){
+		Collections.sort(this.scores);
+		ArrayList<NationCategories> winners = new ArrayList<NationCategories>();
+		for(int i = 0; i < numberOfMedals; i++){
+			winners.add(this.scores.get(i).getNationality());
 		}
-		
-		System.out.println();
-		Results eventResults = new Results(winners);
-		this.updateResults(eventResults);
-		
+		this.result.updateWinners(winners);
+	
 	}
 	
 }
