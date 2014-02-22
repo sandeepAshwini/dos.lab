@@ -1,4 +1,4 @@
-package pkg1;
+package base;
 
 public enum EventCategories {
 	STONE_LUGING("Gold Leaf"),

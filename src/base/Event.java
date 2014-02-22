@@ -1,4 +1,4 @@
-package pkg1;
+package base;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashSet;

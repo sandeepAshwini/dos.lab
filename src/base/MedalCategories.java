@@ -1,4 +1,4 @@
-package pkg1;
+package base;
 
 public enum MedalCategories {
 	GOLD_LEAF("Gold Leaf"),
