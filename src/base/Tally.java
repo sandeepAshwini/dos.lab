@@ -1,8 +1,9 @@
 package base;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class Tally {
+public class Tally implements Serializable {
 	private static MedalCategories medalTypes;
 	
 	private HashMap<MedalCategories, Integer> medalTally;

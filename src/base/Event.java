@@ -16,11 +16,12 @@ public class Event implements Serializable{
 	public Event(EventCategories eventName){
 		this.eventName = eventName;
 		this.result = new Results();
+		setScores();
 	}
 
 	private void setScores(){
 		Random rand = new Random();
-		this.numberOfParticipants = rand.nextInt(10);
+		this.numberOfParticipants = rand.nextInt(7) + 3;
 		this.athletes = new ArrayList<Athlete>();
 		for(int i = 0; i < numberOfParticipants; i++)
 		{
@@ -30,8 +31,7 @@ public class Event implements Serializable{
 	}
 	
 	public void updateResults(Results result){
-		this.result = result;
-		
+		this.result = result;		
 	}
 	
 	public Results getResult(){
