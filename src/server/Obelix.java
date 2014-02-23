@@ -7,6 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,9 +22,9 @@ import base.Tally;
 public class Obelix implements ObelixInterface {
 	
 	private Set<Event> completedEvents;
-	private Map<NationCategories, Tally> medalTallies;
+	private Map<NationCategories, Tally> medalTallies;	
+	private Map<String, Subscriber> subscribers = new HashMap<String, Subscriber>();
 	private Map<EventCategories, ArrayList<Athlete>> scores;
-	
 	
 	public Obelix() {
 		this.completedEvents = new HashSet<Event>();
@@ -35,17 +36,25 @@ public class Obelix implements ObelixInterface {
 		}
 	}
 	
-	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
-		updateScores(simulatedEvent);
+	public void updateResultsAndTallies(Event simulatedEvent) throws RemoteException {
+		updateResults(simulatedEvent);
 		updateMedalTallies(simulatedEvent.getResult());
 	}
 	
-	private void updateScores(Event completedEvent) {
+	private void updateResults(Event completedEvent) {
 		this.completedEvents.add(completedEvent);
 	}
 	
-	public void updateCurrentScores(EventCategories eventType, ArrayList<Athlete> currentScores) {
-		this.scores.put(eventType, currentScores);
+	public void updateCurrentScores(final EventCategories eventName, final List<Athlete> currentScores) {
+		Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				sendScoresToSubscribers(eventName, currentScores);
+			}
+		});
+		thread.start();
+		this.scores.put(eventName, (ArrayList<Athlete>) currentScores);
 	}
 	
 	private void updateMedalTallies(Results eventResult) {
@@ -54,7 +63,11 @@ public class Obelix implements ObelixInterface {
 		}		
 	}
 	
-	public Results getScores(EventCategories eventName) {
+	private void sendScoresToSubscribers(EventCategories eventName, List<Athlete> currentScores) {
+		
+	}
+	
+	public Results getResults(EventCategories eventName) {
 		Results eventResult = null;
 		
 		for(Event event : this.completedEvents) {
@@ -67,7 +80,7 @@ public class Obelix implements ObelixInterface {
 		return eventResult;
 	}
 	
-	public ArrayList<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException
+	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException
 	{
 		if(this.scores.containsKey(eventName))
 		{
@@ -82,18 +95,32 @@ public class Obelix implements ObelixInterface {
 		return this.medalTallies.get(teamName);
 	}
 	
+	public synchronized void registerClient(String clientID, EventCategories eventName) {
+		
+		Subscriber subscriber = null;
+		
+		if(subscribers.containsKey(clientID)) {
+			subscriber = new Subscriber();
+			subscriber.setClientID(clientID);
+		} else {
+			subscriber = subscribers.get(clientID);
+		}
+		
+		subscriber.subscribeTo(eventName);		
+	}
+	
 	public static void main(String args[])throws Exception {
         
 		// Bind the remote object's stub in the registry
     	Registry registry = null;
     	String SERVER_NAME = "Obelix";
+    	
     	String host = (args.length < 1) ? null : args[0];
-    
-        ObelixInterface stub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
-        
+        ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
+
         try {        	
             registry = LocateRegistry.getRegistry(host);
-            registry.rebind(SERVER_NAME, stub);
+            registry.rebind(SERVER_NAME, serverStub);
             System.err.println("Obelix ready");            
         } catch (Exception e) {
             System.err.println("Obelix exception: " + e.toString());
