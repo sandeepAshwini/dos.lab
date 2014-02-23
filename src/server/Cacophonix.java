@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
+import java.util.List;
 
 import base.Athlete;
 import base.Event;
@@ -26,16 +26,15 @@ public class Cacophonix implements CacophonixInterface {
 
 	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
 		if (clientStub != null) {
-			clientStub.updateScoresAndTallies(simulatedEvent);
+			clientStub.updateResultsAndTallies(simulatedEvent);
 		}		
 	}
 	
-	public void updateCurrentScores(Event simulatedEvent, ArrayList<Athlete> currentScores) throws RemoteException {
+	public void updateCurrentScores(Event simulatedEvent, List<Athlete> currentScores) throws RemoteException {
 		if (clientStub != null) {
 			clientStub.updateCurrentScores(simulatedEvent.getName(), currentScores);
 		}		
-	}
-	
+	}	
 	
 	public static void main(String args[]) {
 		HOST = (args.length < 1) ? null : args[0];
