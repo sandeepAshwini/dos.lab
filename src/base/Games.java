@@ -1,10 +1,8 @@
 package base;
-import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
-import server.Cacophonix;
 import server.CacophonixInterface;
 
 
@@ -64,7 +62,7 @@ public class Games {
 		game.printGameIntro();
 		
         try {
-        	Registry registry = LocateRegistry.getRegistry();
+        	Registry registry = LocateRegistry.getRegistry(host);
             CacophonixInterface stub = (CacophonixInterface) registry.lookup(SERVER_NAME);
             for(int i = 0; i < numEvents; i++)
     		{

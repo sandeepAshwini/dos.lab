@@ -17,11 +17,13 @@ public class Cacophonix implements CacophonixInterface {
 	
 	public Cacophonix() {
 	}
+	
+	public Cacophonix(ObelixInterface clientStub) {
+		this.clientStub = clientStub;
+	}
 
 	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
-		System.out.println(clientStub);
 		if (clientStub != null) {
-			simulatedEvent.printResults();
 			clientStub.updateScoresAndTallies(simulatedEvent);
 		}		
 	}
@@ -29,18 +31,18 @@ public class Cacophonix implements CacophonixInterface {
 	public static void main(String args[]) {
 		HOST = (args.length < 1) ? null : args[0];
 		Cacophonix cacophonixInstance = new Cacophonix();
-		cacophonixInstance.clientStub = cacophonixInstance.setupClientInstance();
-		cacophonixInstance.setupServerInstance();
+		ObelixInterface clientStub = cacophonixInstance.setupClientInstance();
+		cacophonixInstance.setupServerInstance(clientStub);
 	}
 	
-	private void setupServerInstance() {
+	private void setupServerInstance(ObelixInterface clientStub) {
 		Registry registry = null;
-    	CacophonixInterface stub = null;
+    	CacophonixInterface serverStub = null;
         
         try {
-        	stub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(), 0);
-            registry = LocateRegistry.getRegistry();
-            registry.bind(CACOPHONIX_SERVER_NAME, stub);
+        	serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(clientStub), 0);
+            registry = LocateRegistry.getRegistry(HOST);
+            registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
             System.err.println("Cacophonix ready");
         } catch (Exception e) {
             System.err.println("Cacophonix exception: " + e.toString());
@@ -50,17 +52,17 @@ public class Cacophonix implements CacophonixInterface {
 	
 	private ObelixInterface setupClientInstance() {
 		Registry registry = null;
-		ObelixInterface stub = null;
+		ObelixInterface clientStub = null;
 		
 		try {
-			registry = LocateRegistry.getRegistry();
-	        stub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
+			registry = LocateRegistry.getRegistry(HOST);
+	        clientStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
 		
-		return stub;
+		return clientStub;
     }
 }

@@ -55,7 +55,7 @@ public class Tablet {
 		ObelixInterface stub = null;
 		
 		try {
-			registry = LocateRegistry.getRegistry();
+			registry = LocateRegistry.getRegistry(HOST);
 	        stub = (ObelixInterface) registry.lookup(SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();
