@@ -8,8 +8,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import com.sun.xml.internal.ws.util.StringUtils;
-
 import server.ObelixInterface;
 import base.EventCategories;
 import base.NationCategories;
@@ -85,11 +83,11 @@ public class Tablet {
     
     private Tally getMedalTally(ObelixInterface stub) throws RemoteException {
     	String teamName = getInput("Team name");
-    	return stub.getMedalTally(NationCategories.valueOf(StringUtils.capitalize(teamName)));
+    	return stub.getMedalTally(NationCategories.valueOf(teamName.toUpperCase()));
     }
     
     private Results getScores(ObelixInterface stub) throws RemoteException {
     	String eventName = getInput("Event name");
-    	return stub.getScores(EventCategories.valueOf(StringUtils.capitalize(eventName)));
+    	return stub.getScores(EventCategories.valueOf(eventName.toUpperCase()));
     }
 }
