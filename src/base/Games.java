@@ -49,6 +49,7 @@ public class Games {
 		return this.events.get(this.currentEvent);
 	}
 	
+	
 	public void printGameIntro()
 	{
 		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue + ".");
