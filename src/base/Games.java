@@ -64,7 +64,7 @@ public class Games {
 		game.printGameIntro();
 		
         try {
-        	Registry registry = LocateRegistry.getRegistry(host);
+        	Registry registry = LocateRegistry.getRegistry();
             CacophonixInterface stub = (CacophonixInterface) registry.lookup(SERVER_NAME);
             for(int i = 0; i < numEvents; i++)
     		{

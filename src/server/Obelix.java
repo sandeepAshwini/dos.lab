@@ -30,6 +30,7 @@ public class Obelix implements ObelixInterface {
 	}
 	
 	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
+		simulatedEvent.printResults();
 		updateScores(simulatedEvent);
 		updateMedalTallies(simulatedEvent.getResult());
 	}
@@ -55,6 +56,10 @@ public class Obelix implements ObelixInterface {
 		}
 		
 		return eventResult;
+	}
+	
+	public Tally getMedalTally(NationCategories teamName) {
+		return medalTallies.get(teamName);
 	}
 	
 	public static void main(String args[])throws Exception {
