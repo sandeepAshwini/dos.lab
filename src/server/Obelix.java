@@ -30,7 +30,6 @@ public class Obelix implements ObelixInterface {
 	}
 	
 	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
-		simulatedEvent.printResults();
 		updateScores(simulatedEvent);
 		updateMedalTallies(simulatedEvent.getResult());
 	}
@@ -67,19 +66,17 @@ public class Obelix implements ObelixInterface {
 		// Bind the remote object's stub in the registry
     	Registry registry = null;
     	String SERVER_NAME = "Obelix";
+    	String host = (args.length < 1) ? null : args[0];
     
         ObelixInterface stub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
         
         try {        	
-            registry = LocateRegistry.getRegistry();
-            registry.bind(SERVER_NAME, stub);
+            registry = LocateRegistry.getRegistry(host);
+            registry.rebind(SERVER_NAME, stub);
             System.err.println("Obelix ready");            
         } catch (Exception e) {
             System.err.println("Obelix exception: " + e.toString());
             e.printStackTrace();
-            if(registry != null) {
-            	registry.rebind(SERVER_NAME, stub);
-        	}            
         }
 	}
 }
