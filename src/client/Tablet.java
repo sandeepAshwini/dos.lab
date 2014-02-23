@@ -7,10 +7,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-
-import com.sun.xml.internal.ws.util.StringUtils;
+import java.util.ArrayList;
 
 import server.ObelixInterface;
+import base.Athlete;
 import base.EventCategories;
 import base.NationCategories;
 import base.Results;
@@ -35,12 +35,13 @@ public class Tablet {
     	
     	try {
 	    	while(true) {
-	    		System.out.println("1. Get score.\n2. Get medal tally.\n3. Subscribe to updates.");
+	    		System.out.println("1. Get final results.\n2. Get medal tally.\n3. Get current score.\n4. Subscribe to updates.");
 	    		int choice = Integer.parseInt(reader.readLine());
 	    		switch(choice) {
 	    			case 1: this.getScores(stub).printResults(); break;
 	    			case 2: this.getMedalTally(stub).printMedalTally(); break;
-	    			case 3: System.out.println("Coming soon..."); break;
+	    			case 3: this.getCurrentScore(stub);break;
+	    			case 4: System.out.println("Coming soon..."); break;
 	    			default: System.out.println("Not a valid choice");
 	    		}
 	    	}
@@ -57,7 +58,7 @@ public class Tablet {
 		ObelixInterface stub = null;
 		
 		try {
-			registry = LocateRegistry.getRegistry();
+			registry = LocateRegistry.getRegistry(HOST);
 	        stub = (ObelixInterface) registry.lookup(SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();
@@ -85,11 +86,22 @@ public class Tablet {
     
     private Tally getMedalTally(ObelixInterface stub) throws RemoteException {
     	String teamName = getInput("Team name");
-    	return stub.getMedalTally(NationCategories.valueOf(StringUtils.capitalize(teamName)));
+    	return stub.getMedalTally(NationCategories.valueOf(teamName.toUpperCase()));
     }
     
     private Results getScores(ObelixInterface stub) throws RemoteException {
     	String eventName = getInput("Event name");
-    	return stub.getScores(EventCategories.valueOf(StringUtils.capitalize(eventName)));
+    	return stub.getScores(EventCategories.valueOf(eventName.toUpperCase()));
     }
+    
+    private void getCurrentScore(ObelixInterface stub) throws RemoteException {
+    	String eventName = getInput("Event Name");
+    	System.out.printf("Scores for %s.\n", eventName);
+    	ArrayList<Athlete> scores = stub.getCurrentScores(EventCategories.valueOf(eventName.toUpperCase()));
+    	for(Athlete athlete : scores)
+    	{
+    		athlete.printScore();
+    	}
+    }
+    
 }

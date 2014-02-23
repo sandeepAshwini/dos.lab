@@ -5,8 +5,8 @@ import java.util.UUID;
 
 public class Athlete implements Comparable<Athlete>, Serializable{
 	private static final long serialVersionUID = 6637345322731549058L;
-
 	private static int scoreRange = 10;
+	private static Random randomNumberGenerator = new Random();
 	
 	private NationCategories nationality;
 	private EventCategories event;
@@ -14,13 +14,17 @@ public class Athlete implements Comparable<Athlete>, Serializable{
 	private String name;
 	
 	public Athlete(EventCategories participatingEvent){
-		Random rand = new Random();
-		int number = rand.nextInt(NationCategories.values().length);
+		int number = randomNumberGenerator.nextInt(NationCategories.values().length);
 		this.nationality = NationCategories.values()[number];
-		this.score = rand.nextInt(scoreRange);
+		this.score = randomNumberGenerator.nextInt(scoreRange);
 		this.event = participatingEvent;
 		this.name = UUID.randomUUID().toString();
 
+	}
+	
+	public void incrementScore(){
+		int increment = randomNumberGenerator.nextInt(scoreRange);
+		this.score += increment;
 	}
 
 	@Override
@@ -30,6 +34,10 @@ public class Athlete implements Comparable<Athlete>, Serializable{
 	
 	public NationCategories getNationality(){
 		return this.nationality;
+	}
+	
+	public void printScore(){
+		System.out.printf("Name : %s \t Nationality : %s \t Score : %d. \n", this.name, this.nationality.getCategory(), this.score);
 	}
 	
 }
