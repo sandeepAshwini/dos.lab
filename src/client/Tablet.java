@@ -20,7 +20,7 @@ import base.Printable;
 import base.Results;
 import base.Tally;
 
-public class Tablet implements TabletInterface, Runnable {
+public class Tablet implements TabletInterface {
 
     public Tablet() {}
     
@@ -51,7 +51,7 @@ public class Tablet implements TabletInterface, Runnable {
 	    			case 1: this.getResults(); break;
 	    			case 2: this.getMedalTally(); break;
 	    			case 3: this.getCurrentScore();break;
-	    			case 4: this.printToConsole("Coming soon...", null, null); break;
+	    			case 4: this.subscribeTo(); break;
 	    			default: this.printToConsole("Not a valid menu option.", null, null);
 	    		}
 	    	}
@@ -61,12 +61,6 @@ public class Tablet implements TabletInterface, Runnable {
     		e.printStackTrace();
     	}
     }
-    
-    @Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
     
     private static Tablet getTabletInstance(String obelixHost, String tabletHost) {
 
@@ -109,6 +103,19 @@ public class Tablet implements TabletInterface, Runnable {
             System.err.println("Tablet server exception: " + e.toString());
             e.printStackTrace();
         }       
+    }
+    
+    private void subscribeTo() {
+    	EventCategories eventName = EventCategories.valueOf(getInput("Event name?"));
+    	subscribeTo(eventName);
+    }
+    
+    private void subscribeTo(EventCategories eventName) {
+    	try {
+			obelixStub.registerClient(clientID, null, eventName);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
     }
     
     private synchronized String getInput(String msg) {
