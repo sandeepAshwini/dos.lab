@@ -70,6 +70,7 @@ public class Games {
             for(int i = 0; i < NUM_EVENTS; i++)
     		{
         		Event simulatedEvent = game.simulateNextEvent();
+        		System.out.println(simulatedEvent.getName().getCategory());
     			if(simulatedEvent != null)
     			{
     				while(!simulatedEvent.isCompleted())

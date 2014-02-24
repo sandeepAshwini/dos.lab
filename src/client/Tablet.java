@@ -8,6 +8,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import server.ObelixInterface;
 import base.Athlete;
 import base.EventCategories;
 import base.NationCategories;
+import base.Printable;
 import base.Results;
 import base.Tally;
 
@@ -40,18 +42,17 @@ public class Tablet implements TabletInterface, Runnable {
     }
     
     private void menuLoop() {
-    	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    	
     	try {
 	    	while(true) {
-	    		System.out.println("1. Get final results.\n2. Get medal tally.\n3. Get current score.\n4. Subscribe to updates.");
-	    		int choice = Integer.parseInt(reader.readLine());
+	    		String menuLine = String.format("1. Get final results.\n2. Get medal tally.\n3. Get current score.\n4. Subscribe to updates.");
+	    		this.printToConsole(menuLine, null, null);
+	    		int choice = Integer.parseInt(getInput("Enter choice."));
 	    		switch(choice) {
-	    			case 1: this.getResults().printResults(); break;
-	    			case 2: this.getMedalTally().printMedalTally(); break;
+	    			case 1: this.getResults(); break;
+	    			case 2: this.getMedalTally(); break;
 	    			case 3: this.getCurrentScore();break;
-	    			case 4: System.out.println("Coming soon..."); break;
-	    			default: System.out.println("Not a valid choice");
+	    			case 4: this.printToConsole("Coming soon...", null, null); break;
+	    			default: this.printToConsole("Not a valid menu option.", null, null);
 	    		}
 	    	}
     	} catch (NumberFormatException e) {
@@ -110,9 +111,8 @@ public class Tablet implements TabletInterface, Runnable {
         }       
     }
     
-    private String getInput(String msg) {
-    	
-    	System.out.println(msg + "?");
+    private synchronized String getInput(String msg) {
+    	this.printToConsole( msg , null, null);
     	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     	String input = null;
     	
@@ -125,36 +125,75 @@ public class Tablet implements TabletInterface, Runnable {
     	return input;
     }
     
-    private Tally getMedalTally() throws RemoteException {
-    	String teamName = getInput("Team name");
-    	return this.obelixStub.getMedalTally(NationCategories.valueOf(teamName.toUpperCase()));
+    
+    private void getResults() throws RemoteException {
+    	String eventName = getInput("Event name");
+    	EventCategories eventType = EventCategories.valueOf(eventName.toUpperCase());
+    	Results result = obelixStub.getResults(eventType);
+    	this.printCurrentResult(eventType, result);
     }
     
-    private Results getResults() throws RemoteException {
-    	String eventName = getInput("Event name");
-    	return this.obelixStub.getResults(EventCategories.valueOf(eventName.toUpperCase()));
+    private void getMedalTally() throws RemoteException {
+    	String teamName = getInput("Team name");
+    	NationCategories nation = NationCategories.valueOf(teamName.toUpperCase());
+    	Tally medalTally = this.obelixStub.getMedalTally(nation);
+    	this.printCurrentTally(nation, medalTally);
     }
     
     private void getCurrentScore() throws RemoteException {
     	String eventName = getInput("Event Name");
-    	System.out.printf("Scores for %s.\n", eventName);
     	List<Athlete> scores = this.obelixStub.getCurrentScores(EventCategories.valueOf(eventName.toUpperCase()));
-    	for(Athlete athlete : scores)
-    	{
-    		athlete.printScore();
-    	}
+    	printCurrentScore(EventCategories.valueOf(eventName.toUpperCase()), scores);
     }
 
+    
+	private void printCurrentResult(EventCategories eventName, Results result)
+	{
+		String header = String.format("Results for %s.", eventName.getCategory());
+    	this.printToConsole(header, result.convertToList(), null);
+	}
+	
+	private void printCurrentTally(NationCategories teamName, Tally medalTally)
+	{
+		String header = String.format("Medal Tally for %s.", teamName.getCategory());
+    	this.printToConsole(header, medalTally.convertToList(), null);
+	}
+
+	private void printCurrentScore(EventCategories eventName, List<Athlete> scores){
+    	String header = String.format("Scores for %s.", eventName.getCategory());
+    	List<Printable> printList = new ArrayList<Printable>();
+    	for(Athlete athlete : scores){
+    		printList.add(athlete);
+    	}
+    	this.printToConsole(header, printList, null);
+
+    }
+    
 	@Override
-	public void updateScores(List<Athlete> scores) throws RemoteException {
-		// TODO Auto-generated method stub
-		
+	public void updateScores(EventCategories eventName, List<Athlete> scores) throws RemoteException {
+		printCurrentScore(eventName, scores);
 	}
 
 	@Override
-	public void updateResults(Results result) throws RemoteException {
-		// TODO Auto-generated method stub
-		
+	public void updateResults(EventCategories eventName, Results result) throws RemoteException {
+		printCurrentResult(eventName, result);
 	}
-    
+	
+	
+	private synchronized void printToConsole(String header, List<Printable> printList, String footer){
+		if(header != null)
+			System.out.println(header);
+		
+		if(printList != null)
+		{
+		for(Printable printObject:printList){
+			printObject.printContents();
+			}
+		}
+		if(footer != null)
+		System.out.println(footer);
+
+		System.out.println();
+
+	}
 }

@@ -69,22 +69,24 @@ public class Obelix implements ObelixInterface {
 	
 	public Results getResults(EventCategories eventName) {
 		Results eventResult = null;
-		
-		for(Event event : this.completedEvents) {
-			if(event.getName() == eventName) {
-				eventResult = event.getResult();
-				break;
+		synchronized(this.completedEvents){
+			for(Event event : this.completedEvents) {
+				if(event.getName() == eventName) {
+					eventResult = event.getResult();
+					break;
+				}
 			}
 		}
-		
 		return eventResult;
 	}
 	
 	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException
-	{
+	{	
 		if(this.scores.containsKey(eventName))
 		{
-			return this.scores.get(eventName);
+			synchronized(this.scores){
+				return this.scores.get(eventName);
+			}
 		}
 		else{
 			return null;
@@ -92,13 +94,13 @@ public class Obelix implements ObelixInterface {
 		
 	}
 	public Tally getMedalTally(NationCategories teamName) {
-		return this.medalTallies.get(teamName);
+		synchronized(this.medalTallies){
+			return this.medalTallies.get(teamName);
+		}
 	}
 	
 	public synchronized void registerClient(String clientID, EventCategories eventName) {
-		
 		Subscriber subscriber = null;
-		
 		if(subscribers.containsKey(clientID)) {
 			subscriber = new Subscriber();
 			subscriber.setClientID(clientID);

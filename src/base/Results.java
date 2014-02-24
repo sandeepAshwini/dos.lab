@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Results implements Serializable {
+public class Results extends Printable implements Serializable{
 	private static final long serialVersionUID = -7858027301096005662L;
 	private HashMap<MedalCategories, NationCategories> winners;
 	
@@ -35,6 +35,11 @@ public class Results implements Serializable {
 		for(MedalCategories medal : winners.keySet()){
 			System.out.println(medal.getCategory() + " : " + winners.get(medal).getCategory());
 		}
+	}
+
+	public void printContents() {
+		printResults();
+		
 	}
 	
 }

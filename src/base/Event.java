@@ -14,13 +14,13 @@ public class Event implements Serializable, Runnable{
 	private Results result;
 	private int numberOfParticipants;
 	private ArrayList<Athlete> athletes;
-	private boolean isCompleted;
+	private EventStatus eventStatus;
 	
 	
 	public Event(EventCategories eventName){
 		this.eventName = eventName;
 		this.result = new Results();
-		this.isCompleted = false;
+		this.eventStatus = EventStatus.SCHEDULED;
 		setScores();
 	}
 
@@ -54,7 +54,7 @@ public class Event implements Serializable, Runnable{
 	
 	public void run(){
 		int count = 0;
-		
+		this.eventStatus = EventStatus.IN_PROGRESS;
 		try{
 		while(count++ < EVENT_LEGS){
 			updateScores();
@@ -67,8 +67,9 @@ public class Event implements Serializable, Runnable{
 			winners.add(this.athletes.get(i).getNationality());
 		}
 		this.result.updateWinners(winners);	
-		this.isCompleted = true;
+		this.eventStatus = EventStatus.COMPLETED;
 		}catch(InterruptedException e){
+			this.eventStatus = EventStatus.INTERRUPTED;
 			System.out.println("Event Interrupted by Vesuvius.");
 			e.printStackTrace();
 		}
@@ -88,7 +89,7 @@ public class Event implements Serializable, Runnable{
 	
 	public boolean isCompleted()
 	{
-		return this.isCompleted;
+		return (this.eventStatus == EventStatus.COMPLETED);
 	}
 	
 }
