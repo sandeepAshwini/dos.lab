@@ -57,7 +57,7 @@ public class Games {
 	
 	public static void main(String[] args)throws OlympicException{
 		long TIME_DELAY = 20*1000;
-		long SLEEP_DURATION = 2*1000;
+		long SLEEP_DURATION = (long) 5.1*1000;
 		Games game = new Games("Pompeii", "48 BC");
 		int NUM_EVENTS = game.events.size();
 		String HOST = (args.length < 1) ? null : args[0];
