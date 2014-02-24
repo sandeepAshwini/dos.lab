@@ -3,7 +3,7 @@ package base;
 import java.io.Serializable;
 import java.util.HashMap;
 
-public class Tally implements Serializable {
+public class Tally extends Printable implements Serializable {
 	private static MedalCategories medalTypes;
 	
 	private HashMap<MedalCategories, Integer> medalTally;
@@ -25,6 +25,11 @@ public class Tally implements Serializable {
 		for(MedalCategories medal:medalTally.keySet()){
 			System.out.print(medal.getCategory() + " : " + medalTally.get(medal) + " ");
 		}
+		System.out.println();
+	}
+
+	public void printContents() {
+		printMedalTally();
 	}
 	
 }

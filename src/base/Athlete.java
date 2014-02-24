@@ -3,7 +3,7 @@ import java.io.Serializable;
 import java.util.Random;
 import java.util.UUID;
 
-public class Athlete implements Comparable<Athlete>, Serializable{
+public class Athlete extends Printable implements Comparable<Athlete>, Serializable{
 	private static final long serialVersionUID = 6637345322731549058L;
 	private static int scoreRange = 10;
 	private static Random randomNumberGenerator = new Random();
@@ -38,6 +38,10 @@ public class Athlete implements Comparable<Athlete>, Serializable{
 	
 	public void printScore(){
 		System.out.printf("Name : %s \t Nationality : %s \t Score : %d. \n", this.name, this.nationality.getCategory(), this.score);
+	}
+
+	public void printContents() {
+		printScore();
 	}
 	
 }
