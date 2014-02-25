@@ -103,7 +103,6 @@ public class Obelix implements ObelixInterface {
 		}
 		
 		return eventResult;
-//		Future<Results> getResultsTask = this.threadService.submit(new ResultHandler(this.completedEvents, eventName));
 	}
 	
 	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException
@@ -130,7 +129,7 @@ public class Obelix implements ObelixInterface {
 		Subscription subscription = null;
 		
 		synchronized(this.subscriptionMap) {
-			if(this.subscriptionMap.containsKey(clientID)) {
+			if(this.subscriptionMap.containsKey(eventName)) {
 				subscription = this.subscriptionMap.get(eventName);
 			} else {
 				subscription = new Subscription();
@@ -152,14 +151,13 @@ public class Obelix implements ObelixInterface {
 		synchronized(this.subscriptionMap) {
 			subscription = this.subscriptionMap.get(eventName);
 		}
-		
+
 		if(subscription == null) {
 			return;
 		}
 		
 		synchronized(this.subscriberHostMap) {
 			for (String subscriber : subscription.getSubscribers()) {
-				
 				try {
 					registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
 					TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
@@ -178,8 +176,7 @@ public class Obelix implements ObelixInterface {
 		Subscription subscription = null;
 		
 		synchronized(this.subscriptionMap) {
-			subscription = this.subscriptionMap.get(eventName);
-			subscriptionMap.remove(eventName);
+			subscription = this.subscriptionMap.remove(eventName);
 		}		
 		
 		if(subscription == null) {
@@ -188,7 +185,6 @@ public class Obelix implements ObelixInterface {
 		
 		synchronized(this.subscriberHostMap) {
 			for (String subscriber : subscription.getSubscribers()) {
-				
 				try {
 					registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
 					TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
@@ -198,7 +194,7 @@ public class Obelix implements ObelixInterface {
 				} catch (NotBoundException e) {
 					e.printStackTrace();
 				}
-			}			
+			}
 		}
 	}
 	
