@@ -33,6 +33,7 @@ public class Tablet implements TabletInterface {
     
     private ObelixInterface obelixStub;
     private String clientID;
+    private volatile boolean resumeMenuLoop = false;
 
     public static void main(String[] args) {
     	String obelixHost = (args.length < 1) ? null : args[0];
@@ -51,7 +52,9 @@ public class Tablet implements TabletInterface {
 	    			case 1: this.getResults(); break;
 	    			case 2: this.getMedalTally(); break;
 	    			case 3: this.getCurrentScore();break;
-	    			case 4: this.subscribeTo(); break;
+	    			case 4: this.subscribeTo();
+	    					this.waitToResume();
+	    					this.resumeMenuLoop = false; break;
 	    			default: this.printToConsole("Not a valid menu option.", null, null);
 	    		}
 	    	}
@@ -130,8 +133,7 @@ public class Tablet implements TabletInterface {
     	}
     	
     	return input;
-    }
-    
+    }    
     
     private void getResults() throws RemoteException {
     	String eventName = getInput("Event name");
@@ -178,14 +180,15 @@ public class Tablet implements TabletInterface {
     
 	@Override
 	public void updateScores(EventCategories eventName, List<Athlete> scores) throws RemoteException {
+		System.out.println(eventName.getCategory());
 		printCurrentScore(eventName, scores);
 	}
 
 	@Override
 	public void updateResults(EventCategories eventName, Results result) throws RemoteException {
 		printCurrentResult(eventName, result);
+		this.resumeMenuLoop = true;
 	}
-	
 	
 	private synchronized void printToConsole(String header, List<Printable> printList, String footer){
 		if(header != null)
@@ -202,5 +205,9 @@ public class Tablet implements TabletInterface {
 
 		System.out.println();
 
+	}
+	
+	private void waitToResume() {
+		while(this.resumeMenuLoop == false);
 	}
 }
