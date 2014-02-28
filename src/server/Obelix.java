@@ -33,9 +33,7 @@ public class Obelix implements ObelixInterface {
 	 */
 	private Set<Event> completedEvents;
 	private Map<NationCategories, Tally> medalTallies;	
-	private Map<EventCategories, Subscription> subscriptionMap;
 	private Map<EventCategories, ArrayList<Athlete>> scores;
-	private Map<String, String> subscriberHostMap;
 	
 	/**
 	 * Data structures to manage event subscriptions.
