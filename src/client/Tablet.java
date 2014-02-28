@@ -24,6 +24,7 @@ import base.Tally;
  * @author sandeep
  *
  */
+
 public class Tablet implements TabletInterface {
 
     public Tablet() {}
