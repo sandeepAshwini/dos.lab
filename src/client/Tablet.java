@@ -44,7 +44,7 @@ public class Tablet implements TabletInterface {
      */
     private ObelixInterface obelixStub;
     private String clientID;
-    
+
     /**
      * Control Variable to switch between subscribe and 
      * query modes.
