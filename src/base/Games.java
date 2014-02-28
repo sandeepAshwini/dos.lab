@@ -7,9 +7,17 @@ import java.util.ArrayList;
 
 import server.CacophonixInterface;
 
+/**
+ * Class encapsulates the entire Olympic Games.
+ * @author sandeep
+ *
+ */
 
 public class Games {
 	
+	/**
+	 * Game attributes.
+	 */
 	private ArrayList<Event> events;
 	private String venue;
 	private String year;
@@ -27,6 +35,10 @@ public class Games {
 		}
 	}
 	
+	/**
+	 * General getters.
+	 * @return
+	 */
 	public String getGameVenue(){
 		return this.venue;
 	}
@@ -37,7 +49,24 @@ public class Games {
 	public ArrayList<Event> getEvents(){
 		return this.events;
 	}
+
+	public Event getNextEvent(){
+		return this.events.get(this.currentEvent);
+	}
+
+	/**
+	 * Prints a welcome message.
+	 */
+	public void printGameIntro()
+	{
+		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue + ".");
+	}
+
 	
+	/**
+	 * Gets the next event and simulates it on a new thread.
+	 * @return
+	 */
 	public Event simulateNextEvent(){
 		Event currentEvent = events.get(this.currentEvent++);
 		Thread thread = new Thread(currentEvent);
@@ -45,19 +74,20 @@ public class Games {
 		return currentEvent;
 	}
 	
-	public Event getNextEvent(){
-		return this.events.get(this.currentEvent);
-	}
-	
-	
-	public void printGameIntro()
-	{
-		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue + ".");
-	}
-	
+	/**
+	 * The Game class acts as a server for Cacophonix.
+	 * The main method creates a new Game object and simulates the games.
+	 * Events are simulated one after the other with a pre defined break between them.
+	 * Scores of the current event are updated every 5 seconds by 
+	 * sending a message to Cacophonix.
+	 * Once an event is completed, the Results and Medal Tallies are 
+	 * updated by sending a message to Cacophonix.
+	 * @param args
+	 * @throws OlympicException
+	 */
 	public static void main(String[] args)throws OlympicException{
 		long TIME_DELAY = 20*1000;
-		long SLEEP_DURATION = 2*1000;
+		long SLEEP_DURATION = (long) 5.1*1000;
 		Games game = new Games("Pompeii", "48 BC");
 		int NUM_EVENTS = game.events.size();
 		String HOST = (args.length < 1) ? null : args[0];

@@ -4,12 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+/**
+ * Encapsulates an event in the Olympic games.
+ * 
+ */
+
 public class Event implements Serializable, Runnable{
 	private static final long serialVersionUID = -9092827493794079435L;
 	private static int numberOfMedals = MedalCategories.values().length;
 	private static int EVENT_LEGS = 5;
 	private static long INTERVAL = 5 * 1000;
 	
+	/**
+	 * Event attributes.
+	 */
 	private EventCategories eventName;
 	private Results result;
 	private int numberOfParticipants;
@@ -24,6 +32,11 @@ public class Event implements Serializable, Runnable{
 		setScores();
 	}
 
+	/**
+	 * Generates a random number of players for the event.
+	 * This number is greater than 3, since we have 3 places.
+	 * 
+	 */
 	private void setScores(){
 		Random rand = new Random();
 		this.numberOfParticipants = rand.nextInt(7) + 3;
@@ -35,10 +48,11 @@ public class Event implements Serializable, Runnable{
 		
 	}
 	
-	public void updateResults(Results result){
-		this.result = result;		
-	}
 	
+	/**
+	 * Getters for results and event name.
+	 * @return
+	 */
 	public Results getResult(){
 		return this.result;
 	}
@@ -47,11 +61,21 @@ public class Event implements Serializable, Runnable{
 		return this.eventName;
 	}
 	
+	/**
+	 * Prints the results of the event.
+	 */
 	public void printResults(){
 		System.out.println("Event : " + this.eventName.getCategory());
 		this.result.printResults();
 	} 
 	
+	/**
+	* Simulates the event.
+	* Run method simulates the event.
+	* The event consists of 5 legs and a random number of players.
+	* There is a constant interval between legs.
+	* All participant's scores are randomly initialized, and randomly updated in each leg.
+	* */
 	public void run(){
 		int count = 0;
 		this.eventStatus = EventStatus.IN_PROGRESS;
@@ -76,17 +100,30 @@ public class Event implements Serializable, Runnable{
 		
 	}	
 	
+	/**
+	 * Calls incrementScore on each participant.
+	 * Scores can be accessed at any time by the server, hence the update is synchronized.
+	 */
 	private synchronized void updateScores(){
 		for(Athlete athlete : this.athletes){
 			athlete.incrementScore();
 		}
 	}
 	
+	/**
+	 * Returns the current scores.
+	 * Again, updates may happen at any time, and the method must be synchronized.
+	 * @return
+	 */
 	public synchronized ArrayList<Athlete> getScores(){
 		Collections.sort(this.athletes);
 		return this.athletes;
 	}
 	
+	/**
+	 * Returns True if event status has been set to COMPLETED.
+	 * @return
+	 */
 	public boolean isCompleted()
 	{
 		return (this.eventStatus == EventStatus.COMPLETED);

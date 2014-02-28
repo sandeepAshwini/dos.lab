@@ -1,5 +1,10 @@
 package base;
 
+/**
+ * The types of medals up for grabs.
+ * @author sandeep
+ *
+ */
 public enum MedalCategories {
 	GOLD_LEAF("Gold Leaf"),
 	SILVER_LEAF("Silver Leaf"),

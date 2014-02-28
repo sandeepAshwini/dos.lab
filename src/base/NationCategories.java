@@ -1,5 +1,10 @@
 package base;
 
+/**
+ * The participating nations.
+ * @author sandeep
+ *
+ */
 public enum NationCategories {
 	ROME("Rome"),
 	GAUL("Gaul"),
