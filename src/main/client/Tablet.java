@@ -3,6 +3,7 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -78,8 +79,9 @@ public class Tablet implements TabletInterface {
     
     /**
      * Simple command line interface to interact with the user.
+     * @throws OlympicException 
      */
-    private void menuLoop() {
+    private void menuLoop() throws OlympicException {
     	try {
 	    	while(true) {
 	    		String menuLine = String.format("1. Get final results.\n2. Get medal tally.\n3. Get current score.\n4. Subscribe to updates.");
@@ -169,17 +171,21 @@ public class Tablet implements TabletInterface {
     /**
      * Allows subscription to events.
      * Takes the Event Name as user input from the CLI.
+     * @throws OlympicException 
      */
-    private void subscribeTo() {
+    private void subscribeTo() throws OlympicException {
+    	
     	EventCategories eventName = EventCategories.valueOf(getInput("Event name?"));
     	subscribeTo(eventName);
     }
     
-    private void subscribeTo(EventCategories eventName) {
+    private void subscribeTo(EventCategories eventName) throws OlympicException {
+    	
     	try {
-			obelixStub.registerClient(clientID, null, eventName);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+    		RegistryService regService = new RegistryService();
+			obelixStub.registerClient(clientID, regService.getLocalIPAddress(), eventName);
+		} catch (IOException e) {
+			throw new OlympicException("Could not subscribe.", e);
 		}
     }
     
