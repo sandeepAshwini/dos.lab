@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import base.Athlete;
 import base.Event;
@@ -209,7 +208,6 @@ public class Obelix implements ObelixInterface {
 	 * @param currentScores
 	 */
 	private void sendScoresToSubscribers(EventCategories eventName, List<Athlete> currentScores) {
-		Registry registry = null;
 		Subscription subscription = null;
 		
 		synchronized(this.subscriptionMap) {
@@ -220,11 +218,10 @@ public class Obelix implements ObelixInterface {
 			return;
 		}
 		
-		synchronized(this.subscriberHostMap) {
+		synchronized(this.subscriptionMap) {
 			for (String subscriber : subscription.getSubscribers()) {
 				try {
-					registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
-					TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
+					TabletInterface tabletStub = setupObelixClient(subscriber);
 					tabletStub.updateScores(eventName, currentScores);
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -232,6 +229,16 @@ public class Obelix implements ObelixInterface {
 					e.printStackTrace();
 				}
 			}
+		}
+	}
+	
+	private TabletInterface setupObelixClient(String subscriber) throws RemoteException, NotBoundException
+	{
+		Registry registry = null;
+		synchronized(this.subscriberHostMap){
+			registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
+			TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
+			return tabletStub;
 		}
 	}
 	
@@ -283,7 +290,7 @@ public class Obelix implements ObelixInterface {
     	
     	String host = (args.length < 1) ? null : args[0];
         ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
-
+        
         try {        	
             registry = LocateRegistry.getRegistry(host);
             registry.rebind(SERVER_NAME, serverStub);
@@ -293,32 +300,4 @@ public class Obelix implements ObelixInterface {
             e.printStackTrace();
         }
 	}
-}
-
-class ResultHandler implements Callable<Results> {
-	
-	private Set<Event> completedEvents;
-	private EventCategories queriedEventName;
-	
-	ResultHandler() {}
-	
-	ResultHandler(Set<Event> completedEvents, EventCategories eventName) {
-		this.completedEvents = completedEvents;
-		this.queriedEventName = eventName;
-	}
-
-	@Override
-	public Results call() throws Exception {
-		Results eventResult = null;
-		
-		for(Event event : this.completedEvents) {
-			if(event.getName() == this.queriedEventName) {
-				eventResult = event.getResult();
-				break;
-			}
-		}
-		
-		return eventResult;
-	}
-	
 }
