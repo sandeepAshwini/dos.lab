@@ -64,8 +64,12 @@ public class Cacophonix implements CacophonixInterface {
 		HOST = (args.length < 1) ? null : args[0];
 		Cacophonix cacophonixInstance = new Cacophonix();
 		ObelixInterface clientStub = cacophonixInstance.setupClientInstance();
+		
 		try {
-			cacophonixInstance.setupServerInstance(clientStub);
+			RegistryService regService = new RegistryService();
+			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			
+			cacophonixInstance.setupServerInstance(clientStub, regService);
 		} catch (IOException e) {
 			throw new OlympicException("Could not create Registry.", e);
 		}
@@ -77,12 +81,11 @@ public class Cacophonix implements CacophonixInterface {
 	 * @param clientStub
 	 * @throws IOException 
 	 */
-	private void setupServerInstance(ObelixInterface clientStub) throws IOException {
+	private void setupServerInstance(ObelixInterface clientStub, RegistryService regService) throws IOException {
 		Registry registry = null;
     	CacophonixInterface serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(clientStub), 0);
-    	RegistryService regService = new RegistryService();
     	
-        try {
+    	try {
         	registry = LocateRegistry.getRegistry();
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
             System.err.println("Cacophonix ready");
@@ -102,7 +105,6 @@ public class Cacophonix implements CacophonixInterface {
 	private ObelixInterface setupClientInstance() {
 		Registry registry = null;
 		ObelixInterface clientStub = null;
-		
 		try {
 			registry = LocateRegistry.getRegistry(HOST);
 	        clientStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
