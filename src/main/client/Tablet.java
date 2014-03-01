@@ -60,9 +60,9 @@ public class Tablet implements TabletInterface {
      * @param args
      */
     public static void main(String[] args) {
-    	String obelixHost = (args.length < 1) ? null : args[0];
+    	String registryHost = (args.length < 1) ? null : args[0];
     	String tabletHost = (args.length < 2) ? null : args[1];
-    	Tablet tabletInstance = getTabletInstance(obelixHost, tabletHost);
+    	Tablet tabletInstance = getTabletInstance(registryHost, tabletHost);
     	tabletInstance.menuLoop();
     }
     

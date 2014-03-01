@@ -1,4 +1,5 @@
 package base;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -84,6 +85,7 @@ public class Games {
 	 * updated by sending a message to Cacophonix.
 	 * @param args
 	 * @throws OlympicException
+	 * @throws UnknownHostException 
 	 */
 	public static void main(String[] args)throws OlympicException{
 		long TIME_DELAY = 20*1000;
@@ -95,7 +97,7 @@ public class Games {
 		
 		game.printGameIntro();
 		try {
-        	Registry registry = LocateRegistry.getRegistry(HOST);
+			Registry registry = LocateRegistry.getRegistry(HOST);
             CacophonixInterface stub = (CacophonixInterface) registry.lookup(SERVER_NAME);
             for(int i = 0; i < NUM_EVENTS; i++)
     		{
@@ -117,8 +119,7 @@ public class Games {
         	throw new OlympicException("Cannot find Cacophonix.", e);
         }catch(RemoteException e){
         	throw new OlympicException("Error while broadcasting.", e);
-        }
-        catch (InterruptedException e) {
+        }catch (InterruptedException e) {
         	throw new OlympicException("Games Interrupted.", e);
         }
 	}
