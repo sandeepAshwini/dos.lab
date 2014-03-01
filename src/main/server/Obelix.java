@@ -1,5 +1,6 @@
 package server;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -17,6 +18,7 @@ import base.Event;
 import base.EventCategories;
 import base.MedalCategories;
 import base.NationCategories;
+import base.OlympicException;
 import base.Results;
 import base.Tally;
 import client.TabletInterface;
@@ -275,6 +277,26 @@ public class Obelix implements ObelixInterface {
 		}
 	}
 	
+	
+	private void setupObelixServer() throws IOException
+	{
+		Registry registry = null;
+    	String SERVER_NAME = "Obelix";
+    	
+    	RegistryService regService = new RegistryService();
+    	ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
+        try {        	
+        	registry = LocateRegistry.getRegistry();
+            registry.rebind(SERVER_NAME, serverStub);
+            System.err.println("Obelix ready");            
+        }catch(RemoteException e)
+        {
+            regService.setupLocalRegistry();
+            registry = LocateRegistry.getRegistry();
+            registry.rebind(SERVER_NAME, serverStub);
+            System.err.println("New Registry Service created. Obelix ready");     
+        }
+	}
 	/**
 	 * Sets up Obelix's client and server stubs so it may
 	 * perform it's function of servicing client requests and
@@ -282,22 +304,16 @@ public class Obelix implements ObelixInterface {
 	 * @param args
 	 * @throws Exception
 	 */
-	public static void main(String args[])throws Exception {
+	public static void main(String args[])throws OlympicException {
         
 		// Bind the remote object's stub in the registry
-    	Registry registry = null;
-    	String SERVER_NAME = "Obelix";
-    	
-    	String host = (args.length < 1) ? null : args[0];
-        ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
-        
-        try {        	
-            registry = LocateRegistry.getRegistry(host);
-            registry.rebind(SERVER_NAME, serverStub);
-            System.err.println("Obelix ready");            
-        } catch (Exception e) {
-            System.err.println("Obelix exception: " + e.toString());
-            e.printStackTrace();
-        }
+    	Obelix obelixInstance = new Obelix();
+    	try {
+			obelixInstance.setupObelixServer();
+		} catch (IOException e) {
+			throw new OlympicException("Registry Service could not be created.", e);
+		}
+		
+		
 	}
 }
