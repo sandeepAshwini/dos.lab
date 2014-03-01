@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.UUID;
 
 import server.ObelixInterface;
+import server.RegistryService;
 import base.Athlete;
 import base.EventCategories;
 import base.NationCategories;
+import base.OlympicException;
 import base.Printable;
 import base.Results;
 import base.Tally;
@@ -58,11 +60,17 @@ public class Tablet implements TabletInterface {
      * Finally calls the menu loop from where the server can be 
      * queried or events subscribed to.
      * @param args
+     * @throws OlympicException 
      */
-    public static void main(String[] args) {
-    	String registryHost = (args.length < 1) ? null : args[0];
+    public static void main(String[] args) throws OlympicException {
+    	String obelixHost = (args.length < 1) ? null : args[0];
     	String tabletHost = (args.length < 2) ? null : args[1];
-    	Tablet tabletInstance = getTabletInstance(registryHost, tabletHost);
+    	Tablet tabletInstance = null;
+		try {
+			tabletInstance = getTabletInstance(obelixHost, tabletHost);
+		} catch (IOException e) {
+			throw new OlympicException("Registry could not be created.", e);
+		}
     	tabletInstance.menuLoop();
     }
     
@@ -98,8 +106,9 @@ public class Tablet implements TabletInterface {
      * @param obelixHost
      * @param tabletHost
      * @return
+     * @throws IOException 
      */
-    private static Tablet getTabletInstance(String obelixHost, String tabletHost) {
+    private static Tablet getTabletInstance(String obelixHost, String tabletHost) throws IOException {
 
     	ObelixInterface obelixStub = connectToObelix(obelixHost);
     	Tablet tabletInstance = new Tablet(obelixStub);
@@ -134,12 +143,15 @@ public class Tablet implements TabletInterface {
     /**
      * Sets up the tablet as a server to receive updates from Obelix.
      * @param host
+     * @throws IOException 
      */
-    private void setupTabletServer(String host) {
+    private void setupTabletServer(String host) throws IOException {
     	
     	Registry registry = null;
 		this.clientID = CLIENT_BASE_NAME + UUID.randomUUID().toString();
 		TabletInterface tabletStub = null;
+		RegistryService regService = new RegistryService();
+    	
         
         try {
         	tabletStub = (TabletInterface) UnicastRemoteObject.exportObject(this, 0);
@@ -147,9 +159,11 @@ public class Tablet implements TabletInterface {
             registry.rebind(clientID, tabletStub);
             System.err.println("Tablet ready.");         
         } catch (RemoteException e) {
-            System.err.println("Tablet server exception: " + e.toString());
-            e.printStackTrace();
-        }       
+        	regService.setupLocalRegistry();
+            registry = LocateRegistry.getRegistry();
+            registry.rebind(SERVER_NAME, tabletStub);
+            System.err.println("New Registry Service created. Tablet ready");     
+        }    
     }
     
     /**

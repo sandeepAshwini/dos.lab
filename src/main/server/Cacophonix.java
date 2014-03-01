@@ -1,4 +1,5 @@
 package server;
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import base.Athlete;
 import base.Event;
+import base.OlympicException;
 
 /**
  * Encapsulates the functions of Cacophonix.
@@ -56,31 +58,39 @@ public class Cacophonix implements CacophonixInterface {
 	/**
 	 * Sets up client and server functions of Cacophonix.
 	 * @param args
+	 * @throws OlympicException 
 	 */
-	public static void main(String args[]) {
+	public static void main(String args[]) throws OlympicException {
 		HOST = (args.length < 1) ? null : args[0];
 		Cacophonix cacophonixInstance = new Cacophonix();
 		ObelixInterface clientStub = cacophonixInstance.setupClientInstance();
-		cacophonixInstance.setupServerInstance(clientStub);
+		try {
+			cacophonixInstance.setupServerInstance(clientStub);
+		} catch (IOException e) {
+			throw new OlympicException("Could not create Registry.", e);
+		}
 	}
 	
 	/**
 	 * Sets Cacophonix up as a client for the Games class, enabling it to receive scores
 	 * and updates.
 	 * @param clientStub
+	 * @throws IOException 
 	 */
-	private void setupServerInstance(ObelixInterface clientStub) {
+	private void setupServerInstance(ObelixInterface clientStub) throws IOException {
 		Registry registry = null;
-    	CacophonixInterface serverStub = null;
-        
+    	CacophonixInterface serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(clientStub), 0);
+    	RegistryService regService = new RegistryService();
+    	
         try {
-        	serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(clientStub), 0);
-            registry = LocateRegistry.getRegistry(HOST);
+        	registry = LocateRegistry.getRegistry();
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
             System.err.println("Cacophonix ready");
-        } catch (Exception e) {
-            System.err.println("Cacophonix exception: " + e.toString());
-            e.printStackTrace();
+        } catch (RemoteException e) {
+        	regService.setupLocalRegistry();
+            registry = LocateRegistry.getRegistry();
+            registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
+            System.err.println("New Registry Service created. Cacophonix ready");
         }
    	}
 	
