@@ -23,7 +23,7 @@ import base.Tally;
 import client.TabletInterface;
 
 /**
- * Encapsulates the functionality of Obelx.
+ * Encapsulates the functionality of Obelix.
  * @author sandeep
  *
  */
