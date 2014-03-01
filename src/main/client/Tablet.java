@@ -67,7 +67,9 @@ public class Tablet implements TabletInterface {
     	String tabletHost = (args.length < 2) ? null : args[1];
     	Tablet tabletInstance = null;
 		try {
-			tabletInstance = getTabletInstance(obelixHost, tabletHost);
+			RegistryService regService = new RegistryService();
+			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			tabletInstance = getTabletInstance(obelixHost, tabletHost, regService);
 		} catch (IOException e) {
 			throw new OlympicException("Registry could not be created.", e);
 		}
@@ -108,11 +110,11 @@ public class Tablet implements TabletInterface {
      * @return
      * @throws IOException 
      */
-    private static Tablet getTabletInstance(String obelixHost, String tabletHost) throws IOException {
+    private static Tablet getTabletInstance(String obelixHost, String tabletHost, RegistryService regService) throws IOException {
 
     	ObelixInterface obelixStub = connectToObelix(obelixHost);
     	Tablet tabletInstance = new Tablet(obelixStub);
-    	tabletInstance.setupTabletServer(tabletHost);
+    	tabletInstance.setupTabletServer(tabletHost, regService);
     	    	
     	return tabletInstance;
     }
@@ -145,14 +147,12 @@ public class Tablet implements TabletInterface {
      * @param host
      * @throws IOException 
      */
-    private void setupTabletServer(String host) throws IOException {
+    private void setupTabletServer(String host, RegistryService regService) throws IOException {
     	
     	Registry registry = null;
 		this.clientID = CLIENT_BASE_NAME + UUID.randomUUID().toString();
 		TabletInterface tabletStub = null;
-		RegistryService regService = new RegistryService();
-    	
-        
+		
         try {
         	tabletStub = (TabletInterface) UnicastRemoteObject.exportObject(this, 0);
             registry = LocateRegistry.getRegistry(host);

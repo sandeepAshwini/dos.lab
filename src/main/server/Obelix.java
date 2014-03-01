@@ -278,12 +278,11 @@ public class Obelix implements ObelixInterface {
 	}
 	
 	
-	private void setupObelixServer() throws IOException
+	private void setupObelixServer(RegistryService regService) throws IOException
 	{
 		Registry registry = null;
     	String SERVER_NAME = "Obelix";
     	
-    	RegistryService regService = new RegistryService();
     	ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
         try {        	
         	registry = LocateRegistry.getRegistry();
@@ -308,8 +307,11 @@ public class Obelix implements ObelixInterface {
         
 		// Bind the remote object's stub in the registry
     	Obelix obelixInstance = new Obelix();
+    	
     	try {
-			obelixInstance.setupObelixServer();
+    		RegistryService regService = new RegistryService();
+			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			obelixInstance.setupObelixServer(regService);
 		} catch (IOException e) {
 			throw new OlympicException("Registry Service could not be created.", e);
 		}
