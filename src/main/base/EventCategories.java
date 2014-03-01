@@ -19,5 +19,4 @@ public enum EventCategories {
 	public String getCategory(){
 		return this.value;
 	}
-
 }

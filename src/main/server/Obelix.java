@@ -96,7 +96,7 @@ public class Obelix implements ObelixInterface {
 	 * Synchronized as scores are read to answer client queries.
 	 * @param eventResult
 	 */
-	public void updateCurrentScores(EventCategories eventName, List<Athlete> currentScores) {
+	public void updateCurrentScores(EventCategories eventName, List<Athlete> currentScores) throws RemoteException {
 		pushCurrentScores(eventName, currentScores);
 		synchronized(this.scores) {
 			this.scores.put(eventName, (ArrayList<Athlete>) currentScores);
@@ -108,7 +108,7 @@ public class Obelix implements ObelixInterface {
 	 * @param eventName
 	 * @param currentScores
 	 */
-	private void pushCurrentScores(final EventCategories eventName, final List<Athlete> currentScores) {
+	private void pushCurrentScores(final EventCategories eventName, final List<Athlete> currentScores) throws RemoteException {
 		Thread scoreThread = new Thread(new Runnable() {
 			
 			@Override
@@ -140,7 +140,7 @@ public class Obelix implements ObelixInterface {
 	 */
 	public Results getResults(EventCategories eventName) {
 		Results eventResult = null;
-		synchronized(this.completedEvents){
+		synchronized(this.completedEvents) {
 			for(Event event : this.completedEvents) {
 				if(event.getName() == eventName) {
 					eventResult = event.getResult();
@@ -156,11 +156,9 @@ public class Obelix implements ObelixInterface {
 	 * Remote function that can be called by clients to get the current scores
 	 * of an on going event.
 	 */
-	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException
-	{
-		if(this.scores.containsKey(eventName))
-		{
-			synchronized(this.scores){
+	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException {
+		if(this.scores.containsKey(eventName)) {
+			synchronized(this.scores) {
 				return this.scores.get(eventName);
 			}
 		}
@@ -175,7 +173,7 @@ public class Obelix implements ObelixInterface {
 	 * of a particular team.
 	 */
 	public Tally getMedalTally(NationCategories teamName) {
-		synchronized(this.medalTallies){
+		synchronized(this.medalTallies) {
 			return this.medalTallies.get(teamName);
 		}
 	}
@@ -208,6 +206,8 @@ public class Obelix implements ObelixInterface {
 	 * Pushes new scores of an event to all subscribers of that event.
 	 * @param eventName
 	 * @param currentScores
+	 * @throws NotBoundException 
+	 * @throws RemoteException 
 	 */
 	private void sendScoresToSubscribers(EventCategories eventName, List<Athlete> currentScores) {
 		Subscription subscription = null;
@@ -222,22 +222,22 @@ public class Obelix implements ObelixInterface {
 		
 		synchronized(this.subscriptionMap) {
 			for (String subscriber : subscription.getSubscribers()) {
+				TabletInterface tabletStub;
 				try {
-					TabletInterface tabletStub = setupObelixClient(subscriber);
+					tabletStub = setupObelixClient(subscriber);
 					tabletStub.updateScores(eventName, currentScores);
-				} catch (RemoteException e) {
-					e.printStackTrace();
 				} catch (NotBoundException e) {
+					e.printStackTrace();
+				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
 	
-	private TabletInterface setupObelixClient(String subscriber) throws RemoteException, NotBoundException
-	{
+	private TabletInterface setupObelixClient(String subscriber) throws RemoteException, NotBoundException {
 		Registry registry = null;
-		synchronized(this.subscriberHostMap){
+		synchronized(this.subscriberHostMap) {
 			registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
 			TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
 			return tabletStub;
@@ -278,8 +278,7 @@ public class Obelix implements ObelixInterface {
 	}
 	
 	
-	private void setupObelixServer(RegistryService regService) throws IOException
-	{
+	private void setupObelixServer(RegistryService regService) throws IOException {
 		Registry registry = null;
     	String SERVER_NAME = "Obelix";
     	
@@ -288,8 +287,7 @@ public class Obelix implements ObelixInterface {
         	registry = LocateRegistry.getRegistry();
             registry.rebind(SERVER_NAME, serverStub);
             System.err.println("Obelix ready");            
-        }catch(RemoteException e)
-        {
+        } catch(RemoteException e) {
             regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
             registry.rebind(SERVER_NAME, serverStub);
@@ -315,7 +313,5 @@ public class Obelix implements ObelixInterface {
 		} catch (IOException e) {
 			throw new OlympicException("Registry Service could not be created.", e);
 		}
-		
-		
 	}
 }

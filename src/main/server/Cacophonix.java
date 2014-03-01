@@ -20,13 +20,12 @@ import base.OlympicException;
  */
 public class Cacophonix implements CacophonixInterface {
 	
-	private static String HOST;
+	private static String obelixHostname;
 	private static String CACOPHONIX_SERVER_NAME = "Cacophonix";
 	private static String OBELIX_SERVER_NAME = "Obelix";
 	private ObelixInterface clientStub;
 	
-	public Cacophonix() {
-	}
+	public Cacophonix() {}
 	
 	public Cacophonix(ObelixInterface clientStub) {
 		this.clientStub = clientStub;
@@ -61,7 +60,7 @@ public class Cacophonix implements CacophonixInterface {
 	 * @throws OlympicException 
 	 */
 	public static void main(String args[]) throws OlympicException {
-		HOST = (args.length < 1) ? null : args[0];
+		obelixHostname = (args.length < 1) ? null : args[0];
 		Cacophonix cacophonixInstance = new Cacophonix();
 		ObelixInterface clientStub = cacophonixInstance.setupClientInstance();
 		
@@ -106,7 +105,7 @@ public class Cacophonix implements CacophonixInterface {
 		Registry registry = null;
 		ObelixInterface clientStub = null;
 		try {
-			registry = LocateRegistry.getRegistry(HOST);
+			registry = LocateRegistry.getRegistry(obelixHostname);
 	        clientStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();

@@ -11,25 +11,21 @@ import base.OlympicException;
 
 public class RegistryService {
 	
-	public RegistryService(){
-	}
-	
+	public RegistryService(){}
 	
 	public void startRegistryService() throws IOException{
 		Runtime.getRuntime().exec(new String[]{"rmiregistry", "-J-Djava.rmi.server.useCodebaseOnly=false"});
 	}
 	
-	
-	
 	public String getLocalIPAddress() throws SocketException{
-		Enumeration en = NetworkInterface.getNetworkInterfaces();
-		while(en.hasMoreElements()){
-		    NetworkInterface ni=(NetworkInterface) en.nextElement();
-		    Enumeration ee = ni.getInetAddresses();
-		    while(ee.hasMoreElements()) {
-		        InetAddress ia= (InetAddress) ee.nextElement();
-		        if (!ia.isLoopbackAddress() && !(ia instanceof Inet6Address)){
-		        	return ia.getHostAddress();
+		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+		while(networkInterfaces.hasMoreElements()){
+		    NetworkInterface networkInterface = (NetworkInterface) networkInterfaces.nextElement();
+		    Enumeration<InetAddress> networkInterfaceAddresses = networkInterface.getInetAddresses();
+		    while(networkInterfaceAddresses.hasMoreElements()) {
+		        InetAddress networkInterfaceAddress = (InetAddress) networkInterfaceAddresses.nextElement();
+		        if (!networkInterfaceAddress.isLoopbackAddress() && !(networkInterfaceAddress instanceof Inet6Address)){
+		        	return networkInterfaceAddress.getHostAddress();
 		        }
 		    }
 		 }
@@ -41,16 +37,16 @@ public class RegistryService {
 		String ipAddress = this.getLocalIPAddress();
 		try{
 			Thread.currentThread().sleep(200);
-		}catch(InterruptedException e)
-		{}
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
 		
     	System.out.println("Registry Service started at : " + ipAddress);
 		
 	}
 	
 	
-	public static void main(String[] args) throws OlympicException
-	{
+	public static void main(String[] args) throws OlympicException {
 		try {
 			RegistryService service = new RegistryService();
 			service.setupLocalRegistry();
@@ -60,7 +56,5 @@ public class RegistryService {
 		} catch (IOException e) {
 			throw new OlympicException("Registry service could not be instantiated.", e);
 		} 
-		
 	}
-	
 }

@@ -16,12 +16,12 @@ public enum EventStatus {
 	INTERRUPTED("Interrupted");
 	
 	private String value;
-	EventStatus(String category){
+	
+	EventStatus(String category) {
 		this.value = category;
 	}
 	
-	public String getCategory(){
+	public String getCategory() {
 		return this.value;
 	}
-
 }

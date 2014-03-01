@@ -11,11 +11,11 @@ public enum NationCategories {
 	PARTHIA("Parthia");
 	
 	private String value;
-	NationCategories(String category){
+	NationCategories(String category) {
 		this.value = category;
 	}
 	
-	public String getCategory(){
+	public String getCategory() {
 		return this.value;
 	}
 }

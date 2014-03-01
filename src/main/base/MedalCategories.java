@@ -11,7 +11,7 @@ public enum MedalCategories {
 	BRONZE_LEAF("Bronze Leaf");
 	
 	private String value;
-	MedalCategories(String category){
+	MedalCategories(String category) {
 		this.value = category;
 	}
 	

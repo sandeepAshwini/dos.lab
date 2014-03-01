@@ -3,7 +3,6 @@ package client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.SocketException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -39,7 +38,7 @@ public class Tablet implements TabletInterface {
      * Members specifying the server name(Obelix)
      * and the base client identifier.
      */
-    private static String SERVER_NAME = "Obelix";
+    private static String OBELIX_SERVER_NAME = "Obelix";
     private static String CLIENT_BASE_NAME = "Client_";
     
     /**
@@ -113,7 +112,6 @@ public class Tablet implements TabletInterface {
      * @throws IOException 
      */
     private static Tablet getTabletInstance(String obelixHost, String tabletHost, RegistryService regService) throws IOException {
-
     	ObelixInterface obelixStub = connectToObelix(obelixHost);
     	Tablet tabletInstance = new Tablet(obelixStub);
     	tabletInstance.setupTabletServer(tabletHost, regService);
@@ -128,13 +126,12 @@ public class Tablet implements TabletInterface {
      * @return
      */
     private static ObelixInterface connectToObelix(String obelixHost) {
-    	
 		Registry registry = null;
 		ObelixInterface obelixStub = null;
 		
 		try {
 			registry = LocateRegistry.getRegistry(obelixHost);
-	        obelixStub = (ObelixInterface) registry.lookup(SERVER_NAME);
+	        obelixStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
@@ -150,7 +147,6 @@ public class Tablet implements TabletInterface {
      * @throws IOException 
      */
     private void setupTabletServer(String host, RegistryService regService) throws IOException {
-    	
     	Registry registry = null;
 		this.clientID = CLIENT_BASE_NAME + UUID.randomUUID().toString();
 		TabletInterface tabletStub = null;
@@ -163,7 +159,7 @@ public class Tablet implements TabletInterface {
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
-            registry.rebind(SERVER_NAME, tabletStub);
+            registry.rebind(OBELIX_SERVER_NAME, tabletStub);
             System.err.println("New Registry Service created. Tablet ready");     
         }    
     }
@@ -174,13 +170,11 @@ public class Tablet implements TabletInterface {
      * @throws OlympicException 
      */
     private void subscribeTo() throws OlympicException {
-    	
     	EventCategories eventName = EventCategories.valueOf(getInput("Event name?"));
     	subscribeTo(eventName);
     }
     
     private void subscribeTo(EventCategories eventName) throws OlympicException {
-    	
     	try {
     		RegistryService regService = new RegistryService();
 			obelixStub.registerClient(clientID, regService.getLocalIPAddress(), eventName);
@@ -253,8 +247,7 @@ public class Tablet implements TabletInterface {
 	 * @param eventName
 	 * @param result
 	 */
-    private void printCurrentResult(EventCategories eventName, Results result)
-	{
+    private void printCurrentResult(EventCategories eventName, Results result) {
 		String header = String.format("Results for %s.", eventName.getCategory());
     	this.printToConsole(header, result.convertToList(), null);
 	}
@@ -265,8 +258,7 @@ public class Tablet implements TabletInterface {
 	 * @param eventName
 	 * @param result
 	 */
-    private void printCurrentTally(NationCategories teamName, Tally medalTally)
-	{
+    private void printCurrentTally(NationCategories teamName, Tally medalTally) {
 		String header = String.format("Medal Tally for %s.", teamName.getCategory());
     	this.printToConsole(header, medalTally.convertToList(), null);
 	}
@@ -277,14 +269,13 @@ public class Tablet implements TabletInterface {
 	 * @param eventName
 	 * @param result
 	 */
-	private void printCurrentScore(EventCategories eventName, List<Athlete> scores){
+	private void printCurrentScore(EventCategories eventName, List<Athlete> scores) {
     	String header = String.format("Scores for %s.", eventName.getCategory());
     	List<Printable> printList = new ArrayList<Printable>();
-    	for(Athlete athlete : scores){
+    	for(Athlete athlete : scores) {
     		printList.add(athlete);
     	}
     	this.printToConsole(header, printList, null);
-
     }
     
 	/**
@@ -322,21 +313,19 @@ public class Tablet implements TabletInterface {
 	 * @param printList
 	 * @param footer
 	 */
-	private synchronized void printToConsole(String header, List<Printable> printList, String footer){
+	private synchronized void printToConsole(String header, List<Printable> printList, String footer) {
 		if(header != null)
 			System.out.println(header);
 		
-		if(printList != null)
-		{
-		for(Printable printObject:printList){
-			printObject.printContents();
+		if(printList != null) {
+			for(Printable printObject:printList) {
+				printObject.printContents();
 			}
 		}
-		if(footer != null)
-		System.out.println(footer);
-
+		if(footer != null) {
+			System.out.println(footer);
+		}
 		System.out.println();
-
 	}
 	
 	/**

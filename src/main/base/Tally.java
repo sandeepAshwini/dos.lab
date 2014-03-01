@@ -9,12 +9,12 @@ import java.util.HashMap;
  *
  */
 public class Tally extends Printable implements Serializable {
+	private static final long serialVersionUID = 4325549347170407101L;
 	private HashMap<MedalCategories, Integer> medalTally;
 	
-	public Tally(){
+	public Tally() {
 		this.medalTally = new HashMap<MedalCategories, Integer>();
-		for (MedalCategories category : MedalCategories.values())
-		{
+		for (MedalCategories category : MedalCategories.values()) {
 			medalTally.put(category, 0);
 		}
 	}
@@ -23,7 +23,7 @@ public class Tally extends Printable implements Serializable {
 	 * Used to update the current medal tally, when something new is won.
 	 * @param category
 	 */
-	public void incrementTally(MedalCategories category){
+	public void incrementTally(MedalCategories category) {
 		int currentCount = this.medalTally.get(category);
 		this.medalTally.put(category, currentCount + 1);
 	}
@@ -31,8 +31,8 @@ public class Tally extends Printable implements Serializable {
 	/**
 	 * Print methods and Printable interface implementation.
 	 */
-	public void printMedalTally(){
-		for(MedalCategories medal:medalTally.keySet()){
+	public void printMedalTally() {
+		for(MedalCategories medal:medalTally.keySet()) {
 			System.out.print(medal.getCategory() + " : " + medalTally.get(medal) + " ");
 		}
 		System.out.println();
@@ -41,5 +41,4 @@ public class Tally extends Printable implements Serializable {
 	public void printContents() {
 		printMedalTally();
 	}
-	
 }

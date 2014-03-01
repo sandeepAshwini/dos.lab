@@ -24,14 +24,13 @@ public class Games {
 	private String year;
 	private int currentEvent;
 	
-	public Games(String venue, String year){
+	public Games(String venue, String year) {
 		this.events = new ArrayList<Event>();
 		this.year = year;
 		this.venue = venue;
 		currentEvent = 0;
 
-		for(EventCategories eventName : EventCategories.values())
-		{
+		for(EventCategories eventName : EventCategories.values()) {
 			this.events.add(new Event(eventName));
 		}
 	}
@@ -40,26 +39,26 @@ public class Games {
 	 * General getters.
 	 * @return
 	 */
-	public String getGameVenue(){
+	public String getGameVenue() {
 		return this.venue;
 	}
-	public String getGameYear(){
+	
+	public String getGameYear() {
 		return this.year;
 	}
 	
-	public ArrayList<Event> getEvents(){
+	public ArrayList<Event> getEvents() {
 		return this.events;
 	}
 
-	public Event getNextEvent(){
+	public Event getNextEvent() {
 		return this.events.get(this.currentEvent);
 	}
 
 	/**
 	 * Prints a welcome message.
 	 */
-	public void printGameIntro()
-	{
+	public void printGameIntro() {
 		System.out.println("Welcome to the Stone Olympics of " + this.year + " at " + this.venue + ".");
 	}
 
@@ -68,7 +67,7 @@ public class Games {
 	 * Gets the next event and simulates it on a new thread.
 	 * @return
 	 */
-	public Event simulateNextEvent(){
+	public Event simulateNextEvent() {
 		Event currentEvent = events.get(this.currentEvent++);
 		Thread thread = new Thread(currentEvent);
 		thread.start();
@@ -87,19 +86,19 @@ public class Games {
 	 * @throws OlympicException
 	 * @throws UnknownHostException 
 	 */
-	public static void main(String[] args)throws OlympicException{
+	public static void main(String[] args) throws OlympicException {
 		long TIME_DELAY = 20*1000;
 		long SLEEP_DURATION = (long) 5.1*1000;
 		Games game = new Games("Pompeii", "48 BC");
-		int NUM_EVENTS = game.events.size();
-		String HOST = (args.length < 1) ? null : args[0];
-		String SERVER_NAME = "Cacophonix";
+		int numEvents = game.events.size();
+		String cacophonixHost = (args.length < 1) ? null : args[0];
+		String CACOPHONIX_SERVER_NAME = "Cacophonix";
 		
 		game.printGameIntro();
 		try {
-			Registry registry = LocateRegistry.getRegistry(HOST);
-            CacophonixInterface stub = (CacophonixInterface) registry.lookup(SERVER_NAME);
-            for(int i = 0; i < NUM_EVENTS; i++)
+			Registry registry = LocateRegistry.getRegistry(cacophonixHost);
+            CacophonixInterface stub = (CacophonixInterface) registry.lookup(CACOPHONIX_SERVER_NAME);
+            for(int i = 0; i < numEvents; i++)
     		{
         		Event simulatedEvent = game.simulateNextEvent();
         		System.out.println(simulatedEvent.getName().getCategory());
