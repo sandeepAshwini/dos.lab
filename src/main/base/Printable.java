@@ -1,5 +1,7 @@
 package base;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,4 +19,6 @@ public abstract class Printable {
 		tempList.add(this);
 		return tempList;
 	}
+	
+	public void writeToFile(FileWriter writer)throws IOException{}
 }

@@ -1,8 +1,13 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -28,7 +33,8 @@ import base.Tally;
  */
 
 public class Tablet implements TabletInterface {
-
+	private FileWriter writer = null;
+	
     public Tablet() {}
     
     public Tablet(ObelixInterface obelixStub) {
@@ -63,17 +69,31 @@ public class Tablet implements TabletInterface {
      * @throws OlympicException 
      */
     public static void main(String[] args) throws OlympicException {
+    	Tablet tabletInstance = deployTablet(args);
+    	if(tabletInstance != null)
+    	{
+    		tabletInstance.menuLoop();
+    	}
+    	else{
+    		throw new OlympicException("Could not instantiate tablet.");
+    	}
+		
+    }
+    
+    public static Tablet deployTablet(String [] args) throws OlympicException{
     	String obelixHost = (args.length < 1) ? null : args[0];
     	String tabletHost = (args.length < 2) ? null : args[1];
     	Tablet tabletInstance = null;
-		try {
+    	try {
 			RegistryService regService = new RegistryService();
 			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
 			tabletInstance = getTabletInstance(obelixHost, tabletHost, regService);
+			
 		} catch (IOException e) {
 			throw new OlympicException("Registry could not be created.", e);
 		}
-    	tabletInstance.menuLoop();
+    	return tabletInstance;
+    	
     }
     
     /**
@@ -159,7 +179,7 @@ public class Tablet implements TabletInterface {
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
-            registry.rebind(OBELIX_SERVER_NAME, tabletStub);
+            registry.rebind(clientID, tabletStub);
             System.err.println("New Registry Service created. Tablet ready");     
         }    
     }
@@ -174,10 +194,10 @@ public class Tablet implements TabletInterface {
     	subscribeTo(eventName);
     }
     
-    private void subscribeTo(EventCategories eventName) throws OlympicException {
+    public void subscribeTo(EventCategories eventType) throws OlympicException {
     	try {
     		RegistryService regService = new RegistryService();
-			obelixStub.registerClient(clientID, regService.getLocalIPAddress(), eventName);
+			obelixStub.registerClient(clientID, regService.getLocalIPAddress(), eventType);
 		} catch (IOException e) {
 			throw new OlympicException("Could not subscribe.", e);
 		}
@@ -191,7 +211,11 @@ public class Tablet implements TabletInterface {
      * @return
      */
     private synchronized String getInput(String msg) {
-    	this.printToConsole( msg , null, null);
+    	try{
+    		this.printToConsole( msg , null, null);
+        }catch(IOException e){
+    		e.printStackTrace();
+    	}
     	BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     	String input = null;
     	
@@ -212,6 +236,10 @@ public class Tablet implements TabletInterface {
     private void getResults() throws RemoteException {
     	String eventName = getInput("Event name");
     	EventCategories eventType = EventCategories.valueOf(eventName.toUpperCase());
+    	this.getResults(eventType);
+    }
+    
+    public void getResults(EventCategories eventType) throws RemoteException {
     	Results result = obelixStub.getResults(eventType);
     	this.printCurrentResult(eventType, result);
     }
@@ -225,6 +253,10 @@ public class Tablet implements TabletInterface {
     private void getMedalTally() throws RemoteException {
     	String teamName = getInput("Team name");
     	NationCategories nation = NationCategories.valueOf(teamName.toUpperCase());
+    	this.getMedalTally(nation);
+    }
+    
+    public void getMedalTally(NationCategories nation) throws RemoteException {
     	Tally medalTally = this.obelixStub.getMedalTally(nation);
     	this.printCurrentTally(nation, medalTally);
     }
@@ -237,8 +269,13 @@ public class Tablet implements TabletInterface {
     
     private void getCurrentScore() throws RemoteException {
     	String eventName = getInput("Event Name");
-    	List<Athlete> scores = this.obelixStub.getCurrentScores(EventCategories.valueOf(eventName.toUpperCase()));
-    	printCurrentScore(EventCategories.valueOf(eventName.toUpperCase()), scores);
+    	EventCategories eventType = EventCategories.valueOf(eventName.toUpperCase());
+    	this.getCurrentScore(eventType);
+    }
+    
+    public void getCurrentScore(EventCategories eventType) throws RemoteException {
+    	List<Athlete> scores = this.obelixStub.getCurrentScores(eventType);
+    	printCurrentScore(eventType, scores);
     }
 
 	/**
@@ -249,8 +286,14 @@ public class Tablet implements TabletInterface {
 	 */
     private void printCurrentResult(EventCategories eventName, Results result) {
 		String header = String.format("Results for %s.", eventName.getCategory());
-    	this.printToConsole(header, result.convertToList(), null);
-	}
+    	try{
+    		this.printToConsole(header, result.convertToList(), null);
+    	}catch(IOException e){
+    		e.printStackTrace();
+    	}
+	
+    
+    }
 	
 	/**
 	 * Pretty prints the medal tally of the specified team to 
@@ -260,7 +303,12 @@ public class Tablet implements TabletInterface {
 	 */
     private void printCurrentTally(NationCategories teamName, Tally medalTally) {
 		String header = String.format("Medal Tally for %s.", teamName.getCategory());
-    	this.printToConsole(header, medalTally.convertToList(), null);
+    	try{
+    		this.printToConsole(header, medalTally.convertToList(), null);
+    	}catch(IOException e){
+    		e.printStackTrace();
+    	}
+		
 	}
 
     /**
@@ -275,7 +323,12 @@ public class Tablet implements TabletInterface {
     	for(Athlete athlete : scores) {
     		printList.add(athlete);
     	}
-    	this.printToConsole(header, printList, null);
+    	try{
+    		this.printToConsole(header, printList, null);
+    	}catch(IOException e){
+    		e.printStackTrace();
+    	}
+    	
     }
     
 	/**
@@ -287,7 +340,6 @@ public class Tablet implements TabletInterface {
 	 */
 	@Override
 	public void updateScores(EventCategories eventName, List<Athlete> scores) throws RemoteException {
-		System.out.println(eventName.getCategory());
 		printCurrentScore(eventName, scores);
 	}
 	
@@ -308,24 +360,45 @@ public class Tablet implements TabletInterface {
 	 * Synchronized method to print to console.
 	 * This method needs to be thread safe as only one thing should be printed 
 	 * to the console at any given time.
-	 * Also, no utput should be dumped when we are waiting for user input.
+	 * Also, no output should be dumped when we are waiting for user input.
 	 * @param header
 	 * @param printList
 	 * @param footer
+	 * @throws IOException 
 	 */
-	private synchronized void printToConsole(String header, List<Printable> printList, String footer) {
-		if(header != null)
-			System.out.println(header);
-		
-		if(printList != null) {
-			for(Printable printObject:printList) {
-				printObject.printContents();
+	private synchronized void printToConsole(String header, List<Printable> printList, String footer) throws IOException {
+		if(this.writer == null)
+		{
+			if(header != null)
+				System.out.println(header);
+			
+			if(printList != null) {
+				for(Printable printObject:printList) {
+					printObject.printContents();
+				}
 			}
+			if(footer != null) {
+				System.out.println(footer);
+			}
+			System.out.println();
+				
 		}
-		if(footer != null) {
-			System.out.println(footer);
+		else{
+			if(header != null)
+				writer.write(header + "\n");
+			
+			if(printList != null) {
+				for(Printable printObject:printList) {
+					printObject.writeToFile(this.writer);
+				}
+			}
+			if(footer != null) 
+				writer.write(footer + "\n");
+			
+			writer.write("\n");
+			writer.flush();
 		}
-		System.out.println();
+		
 	}
 	
 	/**
@@ -336,4 +409,14 @@ public class Tablet implements TabletInterface {
 	private void waitToResume() {
 		while(this.resumeMenuLoop == false);
 	}
+	
+	public void setOut(String fileName) throws IOException{
+		this.writer = new FileWriter(new File(fileName));
+	}
+	
+	public void shutDown() throws AccessException, RemoteException, NotBoundException {
+		Registry registry = LocateRegistry.getRegistry();
+		System.err.println("Tablet shutting down.");
+		registry.unbind(clientID);
+	}	
 }

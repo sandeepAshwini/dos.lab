@@ -1,4 +1,6 @@
 package base;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,4 +64,12 @@ public class Results extends Printable implements Serializable {
 	public void printContents() {
 		printResults();
 	}
+	
+	
+	public void writeToFile(FileWriter writer) throws IOException {
+		for(MedalCategories medal : winners.keySet()) {
+			writer.write(medal.getCategory() + " : " + winners.get(medal).getCategory() + "\n");
+		}
+	}
+	
 }

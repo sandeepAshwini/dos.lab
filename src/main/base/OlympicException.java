@@ -13,4 +13,8 @@ public class OlympicException extends Exception {
     public OlympicException(String message, Exception nestedException) {
        super(message, nestedException);
     }
+    
+    public OlympicException(String message) {
+        super(message);
+     }
 }

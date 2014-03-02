@@ -87,7 +87,7 @@ public class Games {
 	 * @throws UnknownHostException 
 	 */
 	public static void main(String[] args) throws OlympicException {
-		long TIME_DELAY = 20*1000;
+		long TIME_DELAY = 2*1000;
 		long SLEEP_DURATION = (long) 5.1*1000;
 		Games game = new Games("Pompeii", "48 BC");
 		int numEvents = game.events.size();

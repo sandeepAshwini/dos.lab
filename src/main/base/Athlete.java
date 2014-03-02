@@ -1,4 +1,6 @@
 package base;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Random;
 import java.util.UUID;
@@ -70,4 +72,7 @@ public class Athlete extends Printable implements Comparable<Athlete>, Serializa
 		printScore();
 	}
 	
+	public void writeToFile(FileWriter writer) throws IOException {
+		writer.write(String.format("Name : %s \t Nationality : %s \t Score : %d. \n", this.name, this.nationality.getCategory(), this.score));
+	}
 }

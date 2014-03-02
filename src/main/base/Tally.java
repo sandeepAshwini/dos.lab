@@ -1,5 +1,7 @@
 package base;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -41,4 +43,16 @@ public class Tally extends Printable implements Serializable {
 	public void printContents() {
 		printMedalTally();
 	}
+	
+	public void writeToFile(FileWriter writer)throws IOException{
+		
+		for(MedalCategories medal:medalTally.keySet()) {
+			writer.write(medal.getCategory() + " : " + medalTally.get(medal) + " ");
+		}
+		writer.write("\n");
+		
+	}
+	
+	
+	
 }

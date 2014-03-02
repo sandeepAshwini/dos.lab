@@ -1,0 +1,27 @@
+Medal Tally for Parthia.
+Gold Leaf : 2 Silver Leaf : 0 Bronze Leaf : 1 
+
+Results for Stone Skating.
+Gold Leaf : Gaul
+Silver Leaf : Gaul
+Bronze Leaf : Rome
+
+Results for Stone Sledding.
+Gold Leaf : Parthia
+Silver Leaf : Gaul
+Bronze Leaf : Parthia
+
+Results for Stone Sledding.
+Gold Leaf : Parthia
+Silver Leaf : Gaul
+Bronze Leaf : Parthia
+
+Medal Tally for Rome.
+Gold Leaf : 0 Silver Leaf : 1 Bronze Leaf : 2 
+
+Medal Tally for Gaul.
+Gold Leaf : 1 Silver Leaf : 2 Bronze Leaf : 0 
+
+Medal Tally for Gaul.
+Gold Leaf : 1 Silver Leaf : 2 Bronze Leaf : 0 
+
