@@ -156,7 +156,7 @@ public class Obelix implements ObelixInterface {
 	 * Remote function that can be called by clients to get the current scores
 	 * of an on going event.
 	 */
-	public List<Athlete> getCurrentScores(EventCategories eventName)throws RemoteException {
+	public List<Athlete> getCurrentScores(EventCategories eventName) throws RemoteException {
 		if(this.scores.containsKey(eventName)) {
 			synchronized(this.scores) {
 				return this.scores.get(eventName);
@@ -197,8 +197,16 @@ public class Obelix implements ObelixInterface {
 			
 			subscription.addSubscriber(clientID);
 		}
+		
 		synchronized(this.subscriberHostMap) {
 			this.subscriberHostMap.put(clientID, clientHost);
+		}
+		
+		for (Event completedEvent : completedEvents) {
+			if (completedEvent.getName() == eventName) {
+				pushResults(completedEvent);
+				return;
+			}
 		}
 	}
 	

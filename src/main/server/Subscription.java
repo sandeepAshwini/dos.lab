@@ -1,19 +1,21 @@
 package server;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import base.EventCategories;
 
 public class Subscription {
 	private EventCategories eventName;
-	private List<String> subscribers;
+	private Set<String> subscribers;
 	
 	public EventCategories getEventName() {
 		return this.eventName;
 	}
 	
-	public List<String> getSubscribers() {
+	public Set<String> getSubscribers() {
 		return this.subscribers;
 	}
 	
@@ -23,7 +25,7 @@ public class Subscription {
 	
 	public void addSubscriber(String subscriber) {
 		if(subscribers == null) {
-			subscribers = new ArrayList<String>();
+			subscribers = new HashSet<String>();
 		}
 		subscribers.add(subscriber);
 	}

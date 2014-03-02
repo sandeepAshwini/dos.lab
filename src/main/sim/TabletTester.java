@@ -16,6 +16,8 @@ public class TabletTester implements Runnable
 	private static Random rand = new Random();
 	private static int SLEEP_INTERVAL = 5000;
 	private int numRequests;
+	private static int MIN_REQUESTS = 10;
+	private static int RANGE = 20;
 	private static int counter = 0;
 	
 	public TabletTester(Tablet tabletInstance) throws IOException{
@@ -25,35 +27,34 @@ public class TabletTester implements Runnable
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		numRequests = rand.nextInt(10) + 5;
-		
-		
+		numRequests = rand.nextInt(RANGE) + MIN_REQUESTS;
 	}
 	
-	public EventCategories getEventType(){
+	public EventCategories getEventType() {
 		EventCategories[] events  = EventCategories.values();
 		return events[rand.nextInt(events.length)];
 	}
 	
-	public NationCategories getNation(){
+	public NationCategories getNation() {
 		NationCategories[] nations  = NationCategories.values();
 		return nations[rand.nextInt(nations.length)];
 	}
 
 	@Override
 	public void run() {
-		try{
+		try {
 			for(int i = 0; i < numRequests; i++)
 			{
-				int requestNumber = rand.nextInt(2);
+				int requestNumber = rand.nextInt(4);
+				requestNumber = 3;
 				switch(requestNumber){
 				case 0: this.tabletInstance.getResults(this.getEventType());
 						break;
 				case 1: this.tabletInstance.getMedalTally(this.getNation());
 						break;
-				case 2: //this.tabletInstance.getCurrentScore(this.getEventType());
+				case 2: this.tabletInstance.getCurrentScore(this.getEventType());
 					break;
-				case 3: //this.tabletInstance.subscribeTo(this.getEventType());
+				case 3: this.tabletInstance.subscribeTo(this.getEventType());
 					break;
 				}
 			
@@ -64,8 +65,9 @@ public class TabletTester implements Runnable
 			
 			}catch(RemoteException e){
 				e.printStackTrace();
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (OlympicException e) {
 				e.printStackTrace();
 			}
 		

@@ -2,11 +2,9 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -33,9 +31,10 @@ import base.Tally;
  */
 
 public class Tablet implements TabletInterface {
-	private FileWriter writer = null;
-	
-    public Tablet() {}
+
+    private FileWriter writer = null;
+
+	public Tablet() {}
     
     public Tablet(ObelixInterface obelixStub) {
     	this.obelixStub = obelixStub;
@@ -70,30 +69,26 @@ public class Tablet implements TabletInterface {
      */
     public static void main(String[] args) throws OlympicException {
     	Tablet tabletInstance = deployTablet(args);
-    	if(tabletInstance != null)
-    	{
+    	if(tabletInstance != null) {
     		tabletInstance.menuLoop();
-    	}
-    	else{
+    	} else {
     		throw new OlympicException("Could not instantiate tablet.");
     	}
-		
     }
     
-    public static Tablet deployTablet(String [] args) throws OlympicException{
+    public static Tablet deployTablet(String[] args) throws OlympicException {
     	String obelixHost = (args.length < 1) ? null : args[0];
     	String tabletHost = (args.length < 2) ? null : args[1];
     	Tablet tabletInstance = null;
-    	try {
+		try {
 			RegistryService regService = new RegistryService();
 			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
 			tabletInstance = getTabletInstance(obelixHost, tabletHost, regService);
-			
 		} catch (IOException e) {
 			throw new OlympicException("Registry could not be created.", e);
 		}
-    	return tabletInstance;
-    	
+		
+		return tabletInstance;
     }
     
     /**
@@ -179,7 +174,7 @@ public class Tablet implements TabletInterface {
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
-            registry.rebind(clientID, tabletStub);
+            registry.rebind(OBELIX_SERVER_NAME, tabletStub);
             System.err.println("New Registry Service created. Tablet ready");     
         }    
     }
@@ -241,7 +236,15 @@ public class Tablet implements TabletInterface {
     
     public void getResults(EventCategories eventType) throws RemoteException {
     	Results result = obelixStub.getResults(eventType);
-    	this.printCurrentResult(eventType, result);
+    	if (result != null) {
+    		this.printCurrentResult(eventType, result);
+    	} else {
+    		try {
+				printToConsole("Event " + eventType.getCategory() + " hasn't completed yet.", null, null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
     }
     
     /**
@@ -275,7 +278,15 @@ public class Tablet implements TabletInterface {
     
     public void getCurrentScore(EventCategories eventType) throws RemoteException {
     	List<Athlete> scores = this.obelixStub.getCurrentScores(eventType);
-    	printCurrentScore(eventType, scores);
+    	if(scores != null && scores.size() != 0) {
+    		printCurrentScore(eventType, scores);
+    	} else {
+    		try {
+				printToConsole("Event " + eventType.getCategory() + " hasn't started yet.", null, null);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
     }
 
 	/**
@@ -291,8 +302,6 @@ public class Tablet implements TabletInterface {
     	}catch(IOException e){
     		e.printStackTrace();
     	}
-	
-    
     }
 	
 	/**
@@ -308,7 +317,6 @@ public class Tablet implements TabletInterface {
     	}catch(IOException e){
     		e.printStackTrace();
     	}
-		
 	}
 
     /**
@@ -328,7 +336,6 @@ public class Tablet implements TabletInterface {
     	}catch(IOException e){
     		e.printStackTrace();
     	}
-    	
     }
     
 	/**
