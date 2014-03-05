@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import server.ObelixInterface;
-import server.RegistryService;
+import util.RegistryService;
 import base.Athlete;
 import base.EventCategories;
 import base.NationCategories;
@@ -76,6 +75,12 @@ public class Tablet implements TabletInterface {
     	}
     }
     
+    /**
+     * Deploys a single tablet instance, configuring it with the right host and client addresses.
+     * @param args
+     * @return Tablet
+     * @throws OlympicException
+     */
     public static Tablet deployTablet(String[] args) throws OlympicException {
     	String obelixHost = (args.length < 1) ? null : args[0];
     	String tabletHost = (args.length < 2) ? null : args[1];
@@ -123,7 +128,7 @@ public class Tablet implements TabletInterface {
      * Also sets up the Tablet server stub for server push mode.
      * @param obelixHost
      * @param tabletHost
-     * @return
+     * @return Tablet
      * @throws IOException 
      */
     private static Tablet getTabletInstance(String obelixHost, String tabletHost, RegistryService regService) throws IOException {
@@ -138,7 +143,7 @@ public class Tablet implements TabletInterface {
      * Returns the Server(Obelix) stub after doing the required lookup 
      * in the RMI Registry and creating the stub.
      * @param obelixHost
-     * @return
+     * @return ObelixInterface
      */
     private static ObelixInterface connectToObelix(String obelixHost) {
 		Registry registry = null;
@@ -170,6 +175,7 @@ public class Tablet implements TabletInterface {
         	tabletStub = (TabletInterface) UnicastRemoteObject.exportObject(this, 0);
             registry = LocateRegistry.getRegistry(host);
             registry.rebind(clientID, tabletStub);
+            System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
             System.err.println("Tablet ready.");         
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
@@ -420,10 +426,4 @@ public class Tablet implements TabletInterface {
 	public void setOut(String fileName) throws IOException{
 		this.writer = new FileWriter(new File(fileName));
 	}
-	
-	public void shutDown() throws AccessException, RemoteException, NotBoundException {
-		Registry registry = LocateRegistry.getRegistry();
-		System.err.println("Tablet shutting down.");
-		registry.unbind(clientID);
-	}	
 }

@@ -11,6 +11,11 @@ import base.NationCategories;
 import base.Results;
 import base.Tally;
 
+/**
+ * Declares the functions exported by Obelix.
+ * @author aravind
+ *
+ */
 public interface ObelixInterface extends Remote {
 	public void updateResultsAndTallies(Event simulatedEvent) throws RemoteException ;
 	public void updateCurrentScores(EventCategories eventType, List<Athlete> currentScores) throws RemoteException;

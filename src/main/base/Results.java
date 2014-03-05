@@ -44,12 +44,10 @@ public class Results extends Printable implements Serializable {
 	 */
 	public void updateWinners(ArrayList<NationCategories> winners) {
 		int i = 0;
-		for(MedalCategories medalType : MedalCategories.values())
-		{
+		for(MedalCategories medalType : MedalCategories.values()) {
 			this.winners.put(medalType, winners.get(i));
 			i++;
 		}
-		
 	}
 	
 	/**
@@ -65,11 +63,9 @@ public class Results extends Printable implements Serializable {
 		printResults();
 	}
 	
-	
 	public void writeToFile(FileWriter writer) throws IOException {
 		for(MedalCategories medal : winners.keySet()) {
 			writer.write(medal.getCategory() + " : " + winners.get(medal).getCategory() + "\n");
 		}
 	}
-	
 }

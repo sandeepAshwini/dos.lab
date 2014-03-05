@@ -6,7 +6,6 @@ import java.util.Random;
 
 /**
  * Encapsulates an event in the Olympic games.
- * 
  */
 
 public class Event implements Serializable, Runnable{
@@ -82,7 +81,7 @@ public class Event implements Serializable, Runnable{
 		try{
 		while(count++ < EVENT_LEGS){
 			updateScores();
-			Thread.currentThread().sleep(INTERVAL);
+			Thread.sleep(INTERVAL);
 		}
 		
 		Collections.sort(this.athletes);

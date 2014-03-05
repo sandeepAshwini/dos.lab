@@ -1,4 +1,4 @@
-package server;
+package util;
 
 import java.io.IOException;
 import java.net.Inet6Address;
@@ -9,14 +9,29 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import base.OlympicException;
 
+/**
+ * A util class to create a registry service with the 
+ * required configuration parameters to be used by the servers.
+ * @author aravind
+ *
+ */
 public class RegistryService {
 	
 	public RegistryService(){}
 	
+	/**
+	 * Creates the registry service.
+	 * @throws IOException
+	 */
 	public void startRegistryService() throws IOException{
 		Runtime.getRuntime().exec(new String[]{"rmiregistry", "-J-Djava.rmi.server.useCodebaseOnly=false"});
 	}
 	
+	/**
+	 * Returns the localIPAddress to be used to configure servers and clients.
+	 * @return String
+	 * @throws SocketException
+	 */
 	public String getLocalIPAddress() throws SocketException{
 		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 		while(networkInterfaces.hasMoreElements()){
@@ -32,16 +47,20 @@ public class RegistryService {
 		return null;
 	}
 	
+	/**
+	 * Sets up the local registry service.
+	 * @throws IOException
+	 */
 	public void setupLocalRegistry() throws IOException{
 		this.startRegistryService();
 		String ipAddress = this.getLocalIPAddress();
 		try{
-			Thread.currentThread().sleep(200);
+			Thread.sleep(200);
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
 		
-    	System.out.println("Registry Service started at : " + ipAddress);
+    	System.err.println("Registry Service started at : " + ipAddress);
 		
 	}
 	

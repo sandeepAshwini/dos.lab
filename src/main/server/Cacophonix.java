@@ -7,6 +7,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
+import util.RegistryService;
 import base.Athlete;
 import base.Event;
 import base.OlympicException;
@@ -37,7 +38,7 @@ public class Cacophonix implements CacophonixInterface {
 	 * This in turn causes these results to be relayed on to Obelix,
 	 * whose database is accordingly updated.
 	 */
-	public void updateScoresAndTallies(Event simulatedEvent) throws RemoteException {
+	public void updateResultsAndTallies(Event simulatedEvent) throws RemoteException {
 		if (clientStub != null) {
 			clientStub.updateResultsAndTallies(simulatedEvent);
 		}		
@@ -67,7 +68,6 @@ public class Cacophonix implements CacophonixInterface {
 		try {
 			RegistryService regService = new RegistryService();
 			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
-			
 			cacophonixInstance.setupServerInstance(clientStub, regService);
 		} catch (IOException e) {
 			throw new OlympicException("Could not create Registry.", e);
@@ -87,6 +87,7 @@ public class Cacophonix implements CacophonixInterface {
     	try {
         	registry = LocateRegistry.getRegistry();
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
+            System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
             System.err.println("Cacophonix ready");
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
@@ -99,7 +100,7 @@ public class Cacophonix implements CacophonixInterface {
 	/**
 	 * Sets Cacophonix up as a server for Obelix. This allows Cacophonix to 'sing'
 	 * any received updates and hence inform Obelix of the same.
-	 * @return
+	 * @return ObelixInterface
 	 */
 	private ObelixInterface setupClientInstance() {
 		Registry registry = null;

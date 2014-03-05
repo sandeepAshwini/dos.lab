@@ -1,5 +1,4 @@
 package base;
-import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -37,7 +36,6 @@ public class Games {
 	
 	/**
 	 * General getters.
-	 * @return
 	 */
 	public String getGameVenue() {
 		return this.venue;
@@ -65,7 +63,7 @@ public class Games {
 	
 	/**
 	 * Gets the next event and simulates it on a new thread.
-	 * @return
+	 * @return Event
 	 */
 	public Event simulateNextEvent() {
 		Event currentEvent = events.get(this.currentEvent++);
@@ -84,7 +82,6 @@ public class Games {
 	 * updated by sending a message to Cacophonix.
 	 * @param args
 	 * @throws OlympicException
-	 * @throws UnknownHostException 
 	 */
 	public static void main(String[] args) throws OlympicException {
 		long TIME_DELAY = 20*1000;
@@ -108,11 +105,11 @@ public class Games {
     				{
     					ArrayList<Athlete> currentScores = simulatedEvent.getScores();
     					stub.updateCurrentScores(simulatedEvent, currentScores);
-    					Thread.currentThread().sleep(SLEEP_DURATION);
+    					Thread.sleep(SLEEP_DURATION);
     				}
-    				stub.updateScoresAndTallies(simulatedEvent);
+    				stub.updateResultsAndTallies(simulatedEvent);
     			}
-    			Thread.currentThread().sleep(TIME_DELAY);
+    			Thread.sleep(TIME_DELAY);
     		}
         }catch(NotBoundException e){
         	throw new OlympicException("Cannot find Cacophonix.", e);

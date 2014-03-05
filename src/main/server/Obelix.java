@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import util.RegistryService;
 import base.Athlete;
 import base.Event;
 import base.EventCategories;
@@ -228,6 +229,7 @@ public class Obelix implements ObelixInterface {
 			return;
 		}
 		
+		long startTime = System.currentTimeMillis();
 		synchronized(this.subscriptionMap) {
 			for (String subscriber : subscription.getSubscribers()) {
 				TabletInterface tabletStub;
@@ -241,6 +243,8 @@ public class Obelix implements ObelixInterface {
 				}
 			}
 		}
+		long duration = System.currentTimeMillis() - startTime;
+		System.out.println("Average push latency: " + (duration / subscription.getSubscribers().size()));
 	}
 	
 	private TabletInterface setupObelixClient(String subscriber) throws RemoteException, NotBoundException {
@@ -294,6 +298,7 @@ public class Obelix implements ObelixInterface {
         try {        	
         	registry = LocateRegistry.getRegistry();
             registry.rebind(SERVER_NAME, serverStub);
+            System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
             System.err.println("Obelix ready");            
         } catch(RemoteException e) {
             regService.setupLocalRegistry();

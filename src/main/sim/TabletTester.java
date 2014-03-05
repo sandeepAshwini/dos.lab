@@ -10,17 +10,31 @@ import base.NationCategories;
 import base.OlympicException;
 import client.Tablet;
 
+/**
+ * A Tablet testing utility that generates random requests 
+ * to test the client tablet associated with this TabletTester.
+ * @author aravind
+ *
+ */
 public class TabletTester implements Runnable
 {
 	private Tablet tabletInstance;
 	private static Random rand = new Random();
-	private static int SLEEP_INTERVAL = 5000;
 	private int numRequests;
-	private static int MIN_REQUESTS = 10;
-	private static int RANGE = 20;
 	private static int counter = 0;
 	
-	public TabletTester(Tablet tabletInstance) throws IOException{
+	/**
+	 * Simulation parameters
+	 */
+	private static int SLEEP_INTERVAL = 5000;
+	private static int MIN_REQUESTS = 5;
+	private static int RANGE = 10;
+	
+	/**
+	 * @param tabletInstance
+	 * @throws IOException
+	 */
+	public TabletTester(Tablet tabletInstance) throws IOException {
 		this.tabletInstance = tabletInstance;
 		try {
 			this.tabletInstance.setOut("./output/TabletTester" + counter++ + ".txt");
@@ -30,23 +44,35 @@ public class TabletTester implements Runnable
 		numRequests = rand.nextInt(RANGE) + MIN_REQUESTS;
 	}
 	
+	/**
+	 * Generates and returns a random event category to construct a random request on the tablet.
+	 * @return EventCategories
+	 */
 	public EventCategories getEventType() {
 		EventCategories[] events  = EventCategories.values();
 		return events[rand.nextInt(events.length)];
 	}
 	
+	/**
+	 * Generates and returns a random nation to construct a random request on the tablet.
+	 * @return NationCategories
+	 */
 	public NationCategories getNation() {
 		NationCategories[] nations  = NationCategories.values();
 		return nations[rand.nextInt(nations.length)];
 	}
 
+	/**
+	 * Generates a random number to pick from a list of actions the tablet can perform 
+	 * to test and measure the performance of various requests on the tablet.
+	 */
 	@Override
 	public void run() {
+		long startTime = System.currentTimeMillis();
 		try {
 			for(int i = 0; i < numRequests; i++)
 			{
 				int requestNumber = rand.nextInt(4);
-				requestNumber = 3;
 				switch(requestNumber){
 				case 0: this.tabletInstance.getResults(this.getEventType());
 						break;
@@ -57,20 +83,18 @@ public class TabletTester implements Runnable
 				case 3: this.tabletInstance.subscribeTo(this.getEventType());
 					break;
 				}
-			
-				Thread.currentThread().sleep(SLEEP_INTERVAL);
-				
+				Thread.sleep(SLEEP_INTERVAL);
 			}
 			
-			
-			}catch(RemoteException e){
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (OlympicException e) {
-				e.printStackTrace();
-			}
-		
+		} catch(RemoteException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (OlympicException e) {
+			e.printStackTrace();
+		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("Average latency : " + (endTime - startTime) / this.numRequests);		
 	}
 	
 }
