@@ -24,6 +24,7 @@ public class Cacophonix implements CacophonixInterface {
 	private static String obelixHostname;
 	private static String CACOPHONIX_SERVER_NAME = "Cacophonix";
 	private static String OBELIX_SERVER_NAME = "Obelix";
+	private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
 	private ObelixInterface clientStub;
 	
 	public Cacophonix() {}
@@ -39,6 +40,7 @@ public class Cacophonix implements CacophonixInterface {
 	 * whose database is accordingly updated.
 	 */
 	public void updateResultsAndTallies(Event simulatedEvent) throws RemoteException {
+		System.err.println("Sending updateResultsAndTallies msg.");
 		if (clientStub != null) {
 			clientStub.updateResultsAndTallies(simulatedEvent);
 		}		
@@ -50,6 +52,7 @@ public class Cacophonix implements CacophonixInterface {
 	 * database is accordingly updated.
 	 */
 	public void updateCurrentScores(Event simulatedEvent, List<Athlete> currentScores) throws RemoteException {
+		System.err.println("Sending updatedCurrentScores msg.");
 		if (clientStub != null) {
 			clientStub.updateCurrentScores(simulatedEvent.getName(), currentScores);
 		}		
@@ -67,7 +70,7 @@ public class Cacophonix implements CacophonixInterface {
 		
 		try {
 			RegistryService regService = new RegistryService();
-			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			System.setProperty(JAVA_RMI_HOSTNAME_PROPERTY, regService.getLocalIPAddress());
 			cacophonixInstance.setupServerInstance(clientStub, regService);
 		} catch (IOException e) {
 			throw new OlympicException("Could not create Registry.", e);
@@ -87,13 +90,13 @@ public class Cacophonix implements CacophonixInterface {
     	try {
         	registry = LocateRegistry.getRegistry();
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
-            System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
-            System.err.println("Cacophonix ready");
+            System.err.println("Registry Service running at " + regService.getLocalIPAddress() + ".");
+            System.err.println("Cacophonix ready.");
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
-            System.err.println("New Registry Service created. Cacophonix ready");
+            System.err.println("New Registry Service created. Cacophonix ready.");
         }
    	}
 	

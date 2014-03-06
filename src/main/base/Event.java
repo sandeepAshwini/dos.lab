@@ -13,6 +13,8 @@ public class Event implements Serializable, Runnable{
 	private static int numberOfMedals = MedalCategories.values().length;
 	private static int EVENT_LEGS = 5;
 	private static long INTERVAL = 5 * 1000;
+	private static int MIN_NUMBER_PARTICIPANTS = MedalCategories.values().length;
+	private static int RANGE_NUMBER_PARTICIPANTS = 7;
 	
 	/**
 	 * Event attributes.
@@ -38,7 +40,7 @@ public class Event implements Serializable, Runnable{
 	 */
 	private void setScores(){
 		Random rand = new Random();
-		this.numberOfParticipants = rand.nextInt(7) + 3;
+		this.numberOfParticipants = rand.nextInt(RANGE_NUMBER_PARTICIPANTS) + MIN_NUMBER_PARTICIPANTS;
 		this.athletes = new ArrayList<Athlete>();
 		for(int i = 0; i < numberOfParticipants; i++)
 		{

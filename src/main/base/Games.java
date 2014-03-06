@@ -98,15 +98,17 @@ public class Games {
             for(int i = 0; i < numEvents; i++)
     		{
         		Event simulatedEvent = game.simulateNextEvent();
-        		System.out.println(simulatedEvent.getName().getCategory());
+        		System.err.println("Beginning " + simulatedEvent.getName().getCategory() + ".");
     			if(simulatedEvent != null)
     			{
     				while(!simulatedEvent.isCompleted())
     				{
+    					System.err.println("Sending latest scores.");
     					ArrayList<Athlete> currentScores = simulatedEvent.getScores();
     					stub.updateCurrentScores(simulatedEvent, currentScores);
     					Thread.sleep(SLEEP_DURATION);
     				}
+    				System.err.println("Sending final results.");
     				stub.updateResultsAndTallies(simulatedEvent);
     			}
     			Thread.sleep(TIME_DELAY);

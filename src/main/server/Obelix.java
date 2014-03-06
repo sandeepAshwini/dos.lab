@@ -43,6 +43,8 @@ public class Obelix implements ObelixInterface {
 	private Map<EventCategories, Subscription> subscriptionMap;
 	private Map<String, String> subscriberHostMap;
 	
+	private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
+	
 	public Obelix() {
 		this.completedEvents = new HashSet<Event>();
 		this.medalTallies = new HashMap<NationCategories, Tally>();
@@ -60,6 +62,7 @@ public class Obelix implements ObelixInterface {
 	 * event. Called by Cacophonix when it receives an update from Games.
 	 */
 	public void updateResultsAndTallies(Event simulatedEvent) throws RemoteException {
+		System.err.println("Received updateResultsAndTallies msg.");
 		updateResults(simulatedEvent);
 		updateMedalTallies(simulatedEvent.getResult());
 	}
@@ -98,6 +101,7 @@ public class Obelix implements ObelixInterface {
 	 * @param eventResult
 	 */
 	public void updateCurrentScores(EventCategories eventName, List<Athlete> currentScores) throws RemoteException {
+		System.err.println("Received updateCurrentScores msg.");
 		pushCurrentScores(eventName, currentScores);
 		synchronized(this.scores) {
 			this.scores.put(eventName, (ArrayList<Athlete>) currentScores);
@@ -110,6 +114,7 @@ public class Obelix implements ObelixInterface {
 	 * @param currentScores
 	 */
 	private void pushCurrentScores(final EventCategories eventName, final List<Athlete> currentScores) throws RemoteException {
+		System.err.println("Pushing current scores.");
 		Thread scoreThread = new Thread(new Runnable() {
 			
 			@Override
@@ -125,6 +130,7 @@ public class Obelix implements ObelixInterface {
 	 * @param completedEvent
 	 */
 	private void pushResults(final Event completedEvent) {
+		System.err.println("Pushing results.");
 		Thread resultThread = new Thread(new Runnable() {
 			
 			@Override
@@ -140,6 +146,7 @@ public class Obelix implements ObelixInterface {
 	 * of a completed event.
 	 */
 	public Results getResults(EventCategories eventName) {
+		System.err.println("Sending results for " + eventName + ".");
 		Results eventResult = null;
 		synchronized(this.completedEvents) {
 			for(Event event : this.completedEvents) {
@@ -158,6 +165,7 @@ public class Obelix implements ObelixInterface {
 	 * of an on going event.
 	 */
 	public List<Athlete> getCurrentScores(EventCategories eventName) throws RemoteException {
+		System.err.println("Sending current scores for " + eventName + ".");
 		if(this.scores.containsKey(eventName)) {
 			synchronized(this.scores) {
 				return this.scores.get(eventName);
@@ -174,6 +182,7 @@ public class Obelix implements ObelixInterface {
 	 * of a particular team.
 	 */
 	public Tally getMedalTally(NationCategories teamName) {
+		System.err.println("Sending medal tally for " + teamName + ".");
 		synchronized(this.medalTallies) {
 			return this.medalTallies.get(teamName);
 		}
@@ -184,7 +193,7 @@ public class Obelix implements ObelixInterface {
 	 * create a subscription to a particular event.
 	 */
 	public void registerClient(String clientID, String clientHost, EventCategories eventName) {
-		
+		System.err.println("Registering client " + clientID + ".");
 		Subscription subscription = null;
 		
 		synchronized(this.subscriptionMap) {
@@ -213,6 +222,7 @@ public class Obelix implements ObelixInterface {
 	
 	/**
 	 * Pushes new scores of an event to all subscribers of that event.
+	 * Also measures the average push latency across all subscribers for each update set.
 	 * @param eventName
 	 * @param currentScores
 	 * @throws NotBoundException 
@@ -298,13 +308,13 @@ public class Obelix implements ObelixInterface {
         try {        	
         	registry = LocateRegistry.getRegistry();
             registry.rebind(SERVER_NAME, serverStub);
-            System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
-            System.err.println("Obelix ready");            
+            System.err.println("Registry Service running at " + regService.getLocalIPAddress() + ".");
+            System.err.println("Obelix ready.");            
         } catch(RemoteException e) {
             regService.setupLocalRegistry();
             registry = LocateRegistry.getRegistry();
             registry.rebind(SERVER_NAME, serverStub);
-            System.err.println("New Registry Service created. Obelix ready");     
+            System.err.println("New Registry Service created. Obelix ready.");     
         }
 	}
 	/**
@@ -321,7 +331,7 @@ public class Obelix implements ObelixInterface {
     	
     	try {
     		RegistryService regService = new RegistryService();
-			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			System.setProperty(JAVA_RMI_HOSTNAME_PROPERTY, regService.getLocalIPAddress());
 			obelixInstance.setupObelixServer(regService);
 		} catch (IOException e) {
 			throw new OlympicException("Registry Service could not be created.", e);

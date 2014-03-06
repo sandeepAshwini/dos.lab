@@ -22,13 +22,14 @@ public class TabletTester implements Runnable
 	private static Random rand = new Random();
 	private int numRequests;
 	private static int counter = 0;
+	private static int ALL_REQUESTS = 4;
+	private static int CLIENT_PULL_REQUESTS_ONLY = 3;
 	
-	/**
-	 * Simulation parameters
-	 */
+	//Simulation parameters
 	private static int SLEEP_INTERVAL = 5000;
 	private static int MIN_REQUESTS = 5;
 	private static int RANGE = 10;
+	private boolean allowServerPush = true;
 	
 	/**
 	 * @param tabletInstance
@@ -72,7 +73,11 @@ public class TabletTester implements Runnable
 		try {
 			for(int i = 0; i < numRequests; i++)
 			{
-				int requestNumber = rand.nextInt(4);
+				int requestNumber = rand.nextInt(CLIENT_PULL_REQUESTS_ONLY);
+				if(allowServerPush) {
+					requestNumber = rand.nextInt(ALL_REQUESTS);
+				}
+				
 				switch(requestNumber){
 				case 0: this.tabletInstance.getResults(this.getEventType());
 						break;
@@ -86,7 +91,7 @@ public class TabletTester implements Runnable
 				Thread.sleep(SLEEP_INTERVAL);
 			}
 			
-		} catch(RemoteException e) {
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -94,9 +99,16 @@ public class TabletTester implements Runnable
 			e.printStackTrace();
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println("Average latency : " + (endTime - startTime) / this.numRequests);		
+		System.out.println("Average latency : " + (endTime - startTime - SLEEP_INTERVAL * numRequests) / (double) this.numRequests);		
 	}
 	
+	/**
+	 * Method to allow or disallow server push requests during tablet tests.
+	 * @param boolean
+	 */
+	public void allowServerPush(boolean allowServerPush) {
+		this.allowServerPush = allowServerPush;		
+	}
 }
 
 

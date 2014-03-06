@@ -14,6 +14,9 @@ import client.Tablet;
  *
  */
 public class TabletSimulator {
+	
+	private static int DEFAULT_TABLET_LIMIT = 3;
+	
 	/**
 	 * Creates and deploys N tablets as specified to be used for testing.
 	 * @param numberOfTablets
@@ -60,7 +63,7 @@ public class TabletSimulator {
 	 */
 	public static void main(String[] args) throws OlympicException, IOException, NotBoundException {
 		String obelixHost = (args.length < 1) ? null : args[0];
-		int numTablets = (args.length < 2) ? 3 : Integer.parseInt(args[1]);
+		int numTablets = (args.length < 2) ? DEFAULT_TABLET_LIMIT : Integer.parseInt(args[1]);
 		List<Tablet> tablets = createTablets(numTablets, obelixHost);
 		try {
 			test(tablets);

@@ -11,7 +11,9 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import server.ObelixInterface;
@@ -30,12 +32,20 @@ import base.Tally;
  */
 
 public class Tablet implements TabletInterface {
-
+	//A local copy of the medal tallies.
+	private Map<NationCategories, Tally> medalTallies;
+	
+	//Writer used to write to files instead of the console.
     private FileWriter writer = null;
+    
+    private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
 
-	public Tablet() {}
+	public Tablet() {
+		this.medalTallies = new HashMap<NationCategories, Tally>();
+	}
     
     public Tablet(ObelixInterface obelixStub) {
+    	this.medalTallies = new HashMap<NationCategories, Tally>();
     	this.obelixStub = obelixStub;
     }
     /**
@@ -87,12 +97,12 @@ public class Tablet implements TabletInterface {
     	Tablet tabletInstance = null;
 		try {
 			RegistryService regService = new RegistryService();
-			System.setProperty("java.rmi.server.hostname", regService.getLocalIPAddress());
+			System.setProperty(JAVA_RMI_HOSTNAME_PROPERTY, regService.getLocalIPAddress());
 			tabletInstance = getTabletInstance(obelixHost, tabletHost, regService);
 		} catch (IOException e) {
 			throw new OlympicException("Registry could not be created.", e);
 		}
-		
+		tabletInstance.setupTallyUpdateThread();
 		return tabletInstance;
     }
     
@@ -199,6 +209,7 @@ public class Tablet implements TabletInterface {
     	try {
     		RegistryService regService = new RegistryService();
 			obelixStub.registerClient(clientID, regService.getLocalIPAddress(), eventType);
+			printToConsole("Successfully subscribed to " + eventType.getCategory() + ".", null, null);
 		} catch (IOException e) {
 			throw new OlympicException("Could not subscribe.", e);
 		}
@@ -266,8 +277,23 @@ public class Tablet implements TabletInterface {
     }
     
     public void getMedalTally(NationCategories nation) throws RemoteException {
-    	Tally medalTally = this.obelixStub.getMedalTally(nation);
-    	this.printCurrentTally(nation, medalTally);
+    	synchronized(this.medalTallies) {
+    		Tally medalTally = this.medalTallies.get(nation);
+        	this.printCurrentTally(nation, medalTally);
+    	}    	
+    }
+    
+    public void updateMedalTallies() throws RemoteException {
+    	synchronized(medalTallies) {
+    		for(NationCategories nation : NationCategories.values()) {
+    			this.medalTallies.put(nation, this.obelixStub.getMedalTally(nation));
+    		}
+    	}		
+    }
+    
+    public void setupTallyUpdateThread() {
+    	Thread thread = new Thread(new TallyUpdater(this));
+    	thread.start();
     }
     
     /**
@@ -303,9 +329,9 @@ public class Tablet implements TabletInterface {
 	 */
     private void printCurrentResult(EventCategories eventName, Results result) {
 		String header = String.format("Results for %s.", eventName.getCategory());
-    	try{
+    	try {
     		this.printToConsole(header, result.convertToList(), null);
-    	}catch(IOException e){
+    	} catch(IOException e) {
     		e.printStackTrace();
     	}
     }
@@ -318,9 +344,9 @@ public class Tablet implements TabletInterface {
 	 */
     private void printCurrentTally(NationCategories teamName, Tally medalTally) {
 		String header = String.format("Medal Tally for %s.", teamName.getCategory());
-    	try{
+    	try {
     		this.printToConsole(header, medalTally.convertToList(), null);
-    	}catch(IOException e){
+    	} catch(IOException e) {
     		e.printStackTrace();
     	}
 	}
@@ -337,9 +363,9 @@ public class Tablet implements TabletInterface {
     	for(Athlete athlete : scores) {
     		printList.add(athlete);
     	}
-    	try{
+    	try {
     		this.printToConsole(header, printList, null);
-    	}catch(IOException e){
+    	} catch(IOException e) {
     		e.printStackTrace();
     	}
     }
@@ -425,5 +451,37 @@ public class Tablet implements TabletInterface {
 	
 	public void setOut(String fileName) throws IOException{
 		this.writer = new FileWriter(new File(fileName));
+	}
+}
+
+class TallyUpdater implements Runnable {
+	
+	private Tablet tabletInstance;
+	private int updatePeriod;
+	
+	public TallyUpdater() {}
+	
+	public TallyUpdater(Tablet tabletInstance) {
+		this.tabletInstance = tabletInstance;
+		this.updatePeriod = 2500;
+	}
+	
+	public TallyUpdater(Tablet tabletInstance, int updatePeriod) {
+		this.tabletInstance = tabletInstance;
+		this.updatePeriod = updatePeriod;
+	}
+	
+	@Override
+	public void run() {
+		while(true) {
+			try {
+				tabletInstance.updateMedalTallies();
+				Thread.sleep(updatePeriod);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}		
 	}
 }
