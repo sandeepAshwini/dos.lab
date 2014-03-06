@@ -43,7 +43,11 @@ public class Obelix implements ObelixInterface {
 	private Map<EventCategories, Subscription> subscriptionMap;
 	private Map<String, String> subscriberHostMap;
 	
+	//To prevent the server from being garbage collected.	
+	private static Obelix obelixServerInstance;
+	
 	private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
+	private static int JAVA_RMI_PORT = 1099;
 	
 	public Obelix() {
 		this.completedEvents = new HashSet<Event>();
@@ -55,6 +59,13 @@ public class Obelix implements ObelixInterface {
 		for (NationCategories nation : NationCategories.values()) {
 			this.medalTallies.put(nation, new Tally());
 		}
+	}
+	
+	private static Obelix getObelixInstance() {
+		if(Obelix.obelixServerInstance == null) {
+			Obelix.obelixServerInstance = new Obelix();
+		}
+		return Obelix.obelixServerInstance;
 	}
 	
 	/**
@@ -257,10 +268,18 @@ public class Obelix implements ObelixInterface {
 		System.out.println("Average push latency: " + (duration / subscription.getSubscribers().size()));
 	}
 	
+	/**
+	 * Helper function to setup Obelix client that is 
+	 * used to push score updates and results to subscribers.
+	 * @param subscriber
+	 * @return TabletInterface
+	 * @throws RemoteException
+	 * @throws NotBoundException
+	 */
 	private TabletInterface setupObelixClient(String subscriber) throws RemoteException, NotBoundException {
 		Registry registry = null;
 		synchronized(this.subscriberHostMap) {
-			registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
+			registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber), JAVA_RMI_PORT);
 			TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
 			return tabletStub;
 		}
@@ -286,9 +305,9 @@ public class Obelix implements ObelixInterface {
 		
 		synchronized(this.subscriberHostMap) {
 			for (String subscriber : subscription.getSubscribers()) {
+				TabletInterface tabletStub;
 				try {
-					registry = LocateRegistry.getRegistry(this.subscriberHostMap.get(subscriber));
-					TabletInterface tabletStub = (TabletInterface) registry.lookup(subscriber);
+					tabletStub = setupObelixClient(subscriber);
 					tabletStub.updateResults(eventName, result);
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -300,19 +319,25 @@ public class Obelix implements ObelixInterface {
 	}
 	
 	
-	private void setupObelixServer(RegistryService regService) throws IOException {
+	/**
+	 * Helper function to setup the server at Obelix.
+	 * @param regService
+	 * @throws IOException
+	 * @throws OlympicException
+	 */
+	private void setupObelixServer(RegistryService regService) throws IOException, OlympicException {
 		Registry registry = null;
     	String SERVER_NAME = "Obelix";
     	
-    	ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(new Obelix(), 0);
+    	ObelixInterface serverStub = (ObelixInterface) UnicastRemoteObject.exportObject(Obelix.getObelixInstance(), 0);
         try {        	
-        	registry = LocateRegistry.getRegistry();
+        	registry = LocateRegistry.getRegistry(JAVA_RMI_PORT);
             registry.rebind(SERVER_NAME, serverStub);
             System.err.println("Registry Service running at " + regService.getLocalIPAddress() + ".");
             System.err.println("Obelix ready.");            
         } catch(RemoteException e) {
             regService.setupLocalRegistry();
-            registry = LocateRegistry.getRegistry();
+            registry = LocateRegistry.getRegistry(JAVA_RMI_PORT);
             registry.rebind(SERVER_NAME, serverStub);
             System.err.println("New Registry Service created. Obelix ready.");     
         }
@@ -327,7 +352,7 @@ public class Obelix implements ObelixInterface {
 	public static void main(String args[])throws OlympicException {
         
 		// Bind the remote object's stub in the registry
-    	Obelix obelixInstance = new Obelix();
+    	Obelix obelixInstance = Obelix.getObelixInstance();
     	
     	try {
     		RegistryService regService = new RegistryService();

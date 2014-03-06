@@ -25,12 +25,24 @@ public class Cacophonix implements CacophonixInterface {
 	private static String CACOPHONIX_SERVER_NAME = "Cacophonix";
 	private static String OBELIX_SERVER_NAME = "Obelix";
 	private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
+	private static int JAVA_RMI_PORT = 1099;
+	
+	//To prevent the server from being garbage collected.
+	private static Cacophonix cacophonixServerInstance;
+	
 	private ObelixInterface clientStub;
 	
 	public Cacophonix() {}
 	
 	public Cacophonix(ObelixInterface clientStub) {
 		this.clientStub = clientStub;
+	}
+	
+	private static Cacophonix getCacophonixInstance() {
+		if(Cacophonix.cacophonixServerInstance == null) {
+			Cacophonix.cacophonixServerInstance = new Cacophonix();
+		}
+		return Cacophonix.cacophonixServerInstance;
 	}
 
 	/**
@@ -65,13 +77,12 @@ public class Cacophonix implements CacophonixInterface {
 	 */
 	public static void main(String args[]) throws OlympicException {
 		obelixHostname = (args.length < 1) ? null : args[0];
-		Cacophonix cacophonixInstance = new Cacophonix();
-		ObelixInterface clientStub = cacophonixInstance.setupClientInstance();
-		
+		Cacophonix cacophonixInstance = Cacophonix.getCacophonixInstance();
+		cacophonixInstance.setupClientInstance();		
 		try {
 			RegistryService regService = new RegistryService();
 			System.setProperty(JAVA_RMI_HOSTNAME_PROPERTY, regService.getLocalIPAddress());
-			cacophonixInstance.setupServerInstance(clientStub, regService);
+			cacophonixInstance.setupServerInstance(regService);
 		} catch (IOException e) {
 			throw new OlympicException("Could not create Registry.", e);
 		}
@@ -81,20 +92,20 @@ public class Cacophonix implements CacophonixInterface {
 	 * Sets Cacophonix up as a client for the Games class, enabling it to receive scores
 	 * and updates.
 	 * @param clientStub
-	 * @throws IOException 
+	 * @throws IOException, OlympicException 
 	 */
-	private void setupServerInstance(ObelixInterface clientStub, RegistryService regService) throws IOException {
+	private void setupServerInstance(RegistryService regService) throws IOException, OlympicException {
 		Registry registry = null;
-    	CacophonixInterface serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(new Cacophonix(clientStub), 0);
+    	CacophonixInterface serverStub = (CacophonixInterface) UnicastRemoteObject.exportObject(Cacophonix.getCacophonixInstance(), 0);
     	
     	try {
-        	registry = LocateRegistry.getRegistry();
+        	registry = LocateRegistry.getRegistry(JAVA_RMI_PORT);
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
             System.err.println("Registry Service running at " + regService.getLocalIPAddress() + ".");
             System.err.println("Cacophonix ready.");
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
-            registry = LocateRegistry.getRegistry();
+            registry = LocateRegistry.getRegistry(JAVA_RMI_PORT);
             registry.rebind(CACOPHONIX_SERVER_NAME, serverStub);
             System.err.println("New Registry Service created. Cacophonix ready.");
         }
@@ -109,14 +120,14 @@ public class Cacophonix implements CacophonixInterface {
 		Registry registry = null;
 		ObelixInterface clientStub = null;
 		try {
-			registry = LocateRegistry.getRegistry(obelixHostname);
+			registry = LocateRegistry.getRegistry(obelixHostname, JAVA_RMI_PORT);
 	        clientStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
+	        Cacophonix.getCacophonixInstance().clientStub = clientStub;
 		} catch(RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
-		
 		return clientStub;
     }
 }

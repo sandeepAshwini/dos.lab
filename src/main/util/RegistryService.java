@@ -5,8 +5,8 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
+
 import base.OlympicException;
 
 /**
@@ -16,6 +16,11 @@ import base.OlympicException;
  *
  */
 public class RegistryService {
+	private static int PROPAGATION_INTERVAL = 5000;
+	private static String RMI_COMMAND = "rmiregistry";
+	private static String USE_CODEBASE_ONLY_FALSE = "-J-Djava.rmi.server.useCodebaseOnly=false";
+	private static String JAVA_RMI_PORT = "1099";
+	
 	
 	public RegistryService(){}
 	
@@ -24,7 +29,7 @@ public class RegistryService {
 	 * @throws IOException
 	 */
 	public void startRegistryService() throws IOException{
-		Runtime.getRuntime().exec(new String[]{"rmiregistry", "-J-Djava.rmi.server.useCodebaseOnly=false"});
+		Runtime.getRuntime().exec(new String[]{RMI_COMMAND, USE_CODEBASE_ONLY_FALSE, JAVA_RMI_PORT});
 	}
 	
 	/**
@@ -49,31 +54,24 @@ public class RegistryService {
 	
 	/**
 	 * Sets up the local registry service.
-	 * @throws IOException
+	 * @throws OlympicException
 	 */
-	public void setupLocalRegistry() throws IOException{
-		this.startRegistryService();
-		String ipAddress = this.getLocalIPAddress();
-		try{
-			Thread.sleep(200);
-		} catch(InterruptedException e) {
+	public void setupLocalRegistry() throws OlympicException {
+		try {
+			String ipAddress = this.getLocalIPAddress();
+			this.startRegistryService();
+			System.err.println("Registry Service started at : " + ipAddress);
+			Thread.sleep(PROPAGATION_INTERVAL);
+		} catch (IOException e) {
+			throw new OlympicException("Registry service could not be instantiated.");
+		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-		
-    	System.err.println("Registry Service started at : " + ipAddress);
-		
+		}    	
 	}
 	
 	
 	public static void main(String[] args) throws OlympicException {
-		try {
-			RegistryService service = new RegistryService();
-			service.setupLocalRegistry();
-			
-		} catch (UnknownHostException e) {
-			throw new OlympicException("Registry service could not be instantiated.", e);
-		} catch (IOException e) {
-			throw new OlympicException("Registry service could not be instantiated.", e);
-		} 
+		RegistryService service = new RegistryService();
+		service.setupLocalRegistry(); 
 	}
 }

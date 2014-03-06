@@ -39,6 +39,7 @@ public class Tablet implements TabletInterface {
     private FileWriter writer = null;
     
     private static String JAVA_RMI_HOSTNAME_PROPERTY = "java.rmi.server.hostname";
+    private static int JAVA_RMI_PORT = 1099;
 
 	public Tablet() {
 		this.medalTallies = new HashMap<NationCategories, Tally>();
@@ -141,11 +142,10 @@ public class Tablet implements TabletInterface {
      * @return Tablet
      * @throws IOException 
      */
-    private static Tablet getTabletInstance(String obelixHost, String tabletHost, RegistryService regService) throws IOException {
+    private static Tablet getTabletInstance(String obelixHost, String tabletHost, RegistryService regService) throws IOException, OlympicException {
     	ObelixInterface obelixStub = connectToObelix(obelixHost);
     	Tablet tabletInstance = new Tablet(obelixStub);
     	tabletInstance.setupTabletServer(tabletHost, regService);
-    	    	
     	return tabletInstance;
     }
 
@@ -160,7 +160,7 @@ public class Tablet implements TabletInterface {
 		ObelixInterface obelixStub = null;
 		
 		try {
-			registry = LocateRegistry.getRegistry(obelixHost);
+			registry = LocateRegistry.getRegistry(obelixHost, JAVA_RMI_PORT);
 	        obelixStub = (ObelixInterface) registry.lookup(OBELIX_SERVER_NAME);
 		} catch(RemoteException e) {
 			e.printStackTrace();
@@ -176,21 +176,20 @@ public class Tablet implements TabletInterface {
      * @param host
      * @throws IOException 
      */
-    private void setupTabletServer(String host, RegistryService regService) throws IOException {
+    private void setupTabletServer(String host, RegistryService regService) throws IOException, OlympicException {
     	Registry registry = null;
 		this.clientID = CLIENT_BASE_NAME + UUID.randomUUID().toString();
-		TabletInterface tabletStub = null;
+		TabletInterface tabletStub = (TabletInterface) UnicastRemoteObject.exportObject(this, 0);
 		
         try {
-        	tabletStub = (TabletInterface) UnicastRemoteObject.exportObject(this, 0);
-            registry = LocateRegistry.getRegistry(host);
+            registry = LocateRegistry.getRegistry(host, JAVA_RMI_PORT);
             registry.rebind(clientID, tabletStub);
             System.err.println("Registry Service running at : " + regService.getLocalIPAddress());
             System.err.println("Tablet ready.");         
         } catch (RemoteException e) {
         	regService.setupLocalRegistry();
-            registry = LocateRegistry.getRegistry();
-            registry.rebind(OBELIX_SERVER_NAME, tabletStub);
+            registry = LocateRegistry.getRegistry(host, JAVA_RMI_PORT);
+            registry.rebind(clientID, tabletStub);
             System.err.println("New Registry Service created. Tablet ready");     
         }    
     }
@@ -283,6 +282,10 @@ public class Tablet implements TabletInterface {
     	}    	
     }
     
+    /**
+     * Request medal tallies for all nations from Obelix.
+     * @throws RemoteException
+     */
     public void updateMedalTallies() throws RemoteException {
     	synchronized(medalTallies) {
     		for(NationCategories nation : NationCategories.values()) {
@@ -291,8 +294,11 @@ public class Tablet implements TabletInterface {
     	}		
     }
     
+    /**
+     * Setup the tally updater thread.
+     */
     public void setupTallyUpdateThread() {
-    	Thread thread = new Thread(new TallyUpdater(this));
+    	Thread thread = new Thread(new TallyUpdater(this), "TallyUpdaterThread");
     	thread.start();
     }
     
@@ -454,6 +460,13 @@ public class Tablet implements TabletInterface {
 	}
 }
 
+/**
+ * Private tally updater that runs on a separate thread and 
+ * periodically requests medal tallies from Obelix and
+ * updates the local copy in Tablet.
+ * @author aravind
+ *
+ */
 class TallyUpdater implements Runnable {
 	
 	private Tablet tabletInstance;

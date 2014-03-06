@@ -15,6 +15,8 @@ import server.CacophonixInterface;
 
 public class Games {
 	
+	private static int JAVA_RMI_PORT = 1099;
+	
 	/**
 	 * Game attributes.
 	 */
@@ -93,7 +95,7 @@ public class Games {
 		
 		game.printGameIntro();
 		try {
-			Registry registry = LocateRegistry.getRegistry(cacophonixHost);
+			Registry registry = LocateRegistry.getRegistry(cacophonixHost, JAVA_RMI_PORT);
             CacophonixInterface stub = (CacophonixInterface) registry.lookup(CACOPHONIX_SERVER_NAME);
             for(int i = 0; i < numEvents; i++)
     		{
